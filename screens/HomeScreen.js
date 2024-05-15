@@ -9,11 +9,14 @@ function HomeScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.titleText}>Questree</Text>
-      <Image source={require("../assets/tree.png")} style={styles.treeImg} />
+      <Image
+        source={require("../assets/tree-icon.png")}
+        style={styles.treeImg}
+      />
       <Text style={styles.subTitleText}>Organize Your Quests with Ease</Text>
       <Button
         style={styles.loginBtn}
-        title="Start!"
+        title="시작하기"
         onPress={() => navigation.navigate("Login")}
       />
     </View>
