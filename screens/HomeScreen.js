@@ -6,6 +6,10 @@ import { useNavigation } from "@react-navigation/native";
 function HomeScreen() {
   const navigation = useNavigation();
 
+  fetch("https://api.questree.lesh.kr/")
+    .then((res) => console.log(res))
+    .catch((error) => console.error("Error fetching data:", error));
+
   return (
     <View style={styles.container}>
       <Text style={styles.titleText}>Questree</Text>
