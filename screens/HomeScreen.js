@@ -6,18 +6,15 @@ import { useNavigation } from "@react-navigation/native";
 function HomeScreen() {
   const navigation = useNavigation();
 
-  fetch("https://api.questree.lesh.kr/")
-    .then((res) => console.log(res))
-    .catch((error) => console.error("Error fetching data:", error));
-
   return (
     <View style={styles.container}>
       <Text style={styles.titleText}>Questree</Text>
+      <Text style={styles.subTitleText}>당신의 모든 일정을 한 손에</Text>
+
       <Image
         source={require("../assets/tree-icon.png")}
         style={styles.treeImg}
       />
-      <Text style={styles.subTitleText}>Organize Your Quests with Ease</Text>
       <Button
         style={styles.loginBtn}
         title="시작하기"
@@ -39,18 +36,18 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "#371c07",
-    marginBottom: 100,
+    marginBottom: 15,
   },
   subTitleText: {
     fontSize: 16,
     color: "#8c6b52",
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 60,
   },
 
   treeImg: {
-    width: 300,
-    height: 300,
+    width: 400,
+    height: 400,
     marginBottom: 20,
   },
   loginBtn: {
