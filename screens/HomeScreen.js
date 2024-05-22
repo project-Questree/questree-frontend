@@ -1,13 +1,20 @@
-import React from "react";
-import { StyleSheet, Text, View, Button, Image } from "react-native";
+import { React, useEffect } from "react";
+import { StatusBar, StyleSheet, Text, View, Button, Image } from "react-native";
 import LoginScreen from "./LoginScreen";
 import { useNavigation } from "@react-navigation/native";
 
 function HomeScreen() {
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => navigation.navigate("Login"), 2000);
+
+    return () => clearTimeout(timeoutId);
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
+      <StatusBar style="auto" />
       <Text style={styles.titleText}>Questree</Text>
       <Text style={styles.subTitleText}>당신의 모든 일정을 한 손에</Text>
 
@@ -15,11 +22,11 @@ function HomeScreen() {
         source={require("../assets/tree-icon.png")}
         style={styles.treeImg}
       />
-      <Button
+      {/* <Button
         style={styles.loginBtn}
         title="시작하기"
         onPress={() => navigation.navigate("Login")}
-      />
+      /> */}
     </View>
   );
 }

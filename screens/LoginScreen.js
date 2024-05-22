@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Button, TextInput } from "react-native";
-import todoScreen from "./todoScreen";
+import MainToDoScreen from "./MainToDoScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function LoginScreen({ navigation }) {
@@ -8,35 +8,35 @@ function LoginScreen({ navigation }) {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    const formData = { name, password };
+    // const formData = { name, password };
 
-    fetch("https://api.questree.lesh.kr/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json(); // JSON으로 응답을 받음
-        } else {
-          throw new Error("Login failed"); // 로그인 실패 시 에러 처리
-        }
-      })
-      .then((data) => {
-        const { accessToken, refreshToken } = data;
+    // fetch("https://api.questree.lesh.kr/login", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify(formData),
+    // })
+    //   .then((response) => {
+    //     if (response.ok) {
+    //       return response.json(); // JSON으로 응답을 받음
+    //     } else {
+    //       throw new Error("Login failed"); // 로그인 실패 시 에러 처리
+    //     }
+    //   })
+    //   .then((data) => {
+    //     const { accessToken, refreshToken } = data;
 
-        // 토큰을 async storage에 저장
-        AsyncStorage.setItem("accessToken", accessToken);
-        AsyncStorage.setItem("refreshToken", refreshToken);
+    //     // 토큰을 async storage에 저장
+    //     AsyncStorage.setItem("accessToken", accessToken);
+    //     AsyncStorage.setItem("refreshToken", refreshToken);
 
-        // Plans 화면으로 이동
-        // navigation.navigate("Plans");
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+    //     // 로그인 후 메인 화면으로 이동
+    navigation.navigate("MainToDo");
+    // })
+    // .catch((error) => {
+    //   console.error("Error:", error);
+    // });
   };
 
   return (
