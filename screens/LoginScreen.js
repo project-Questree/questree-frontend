@@ -4,34 +4,46 @@ import MainToDoScreen from "./MainToDoScreen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function LoginScreen({ navigation }) {
-  const [name, setName] = useState("");
+  const [nameOrEmail, setNameOrEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    // const formData = { name, password };
+    //   let formData;
 
-    // fetch("https://api.questree.lesh.kr/login", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(formData),
-    // })
-    //   .then((response) => {
-    //     if (response.ok) {
-    //       return response.json(); // JSON으로 응답을 받음
-    //     } else {
-    //       throw new Error("Login failed"); // 로그인 실패 시 에러 처리
-    //     }
+    //   if (nameOrEmail.includes("@")) {
+    //     formData = {
+    //       email: nameOrEmail,
+    //       password: password,
+    //     };
+    //   } else {
+    //     formData = {
+    //       name: nameOrEmail,
+    //       password: password,
+    //     };
+    //   }
+
+    //   fetch("https://api.questree.lesh.kr/login", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(formData),
     //   })
-    //   .then((data) => {
-    //     const { accessToken, refreshToken } = data;
+    //     .then((response) => {
+    //       if (response.ok) {
+    //         return response.json(); // JSON으로 응답을 받음
+    //       } else {
+    //         throw new Error("로그인 실패"); // 로그인 실패 시 에러 처리
+    //       }
+    //     })
+    //     .then((data) => {
+    //       const { accessToken, refreshToken } = data;
 
-    //     // 토큰을 async storage에 저장
-    //     AsyncStorage.setItem("accessToken", accessToken);
-    //     AsyncStorage.setItem("refreshToken", refreshToken);
+    //       // 토큰을 async storage에 저장
+    //       AsyncStorage.setItem("accessToken", accessToken);
+    //       AsyncStorage.setItem("refreshToken", refreshToken);
 
-    //     // 로그인 후 메인 화면으로 이동
+    //       // 로그인 후 메인 화면으로 이동
     navigation.navigate("MainToDo");
     // })
     // .catch((error) => {
@@ -47,12 +59,12 @@ function LoginScreen({ navigation }) {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text>Name</Text>
+        <Text>ID</Text>
         <TextInput
           style={styles.inputBox}
-          onChangeText={setName}
-          value={name}
-          placeholder="이메일"
+          onChangeText={setNameOrEmail}
+          value={nameOrEmail}
+          placeholder="이름 또는 이메일"
         />
         <Text>Password</Text>
         <TextInput

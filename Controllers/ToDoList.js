@@ -9,23 +9,10 @@ import {
   StyleSheet,
 } from "react-native";
 
+import { Fontisto } from "@expo/vector-icons";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+
 function TodoList({ todos, setTodos, currentDate }) {
-  const [newTodo, setNewTodo] = useState("");
-
-  // Todo를 추가하는 함수
-  const addTodo = () => {
-    if (newTodo.trim() !== "") {
-      setTodos((prevTodos) => ({
-        ...prevTodos,
-        [currentDate.toDateString()]: [
-          ...(prevTodos[currentDate.toDateString()] || []),
-          newTodo,
-        ],
-      }));
-      setNewTodo("");
-    }
-  };
-
   // Todo를 삭제하는 함수
   const deleteTodo = (index) => {
     setTodos((prevTodos) => ({
@@ -36,19 +23,48 @@ function TodoList({ todos, setTodos, currentDate }) {
     }));
   };
 
+  const toggleComplete = (index) => {
+    setTodos((prevTodos) => {
+      const todosForDate = prevTodos[currentDate.toDateString()] || [];
+      todosForDate[index].completed = !todosForDate[index].completed;
+      return {
+        ...prevTodos,
+        [currentDate.toDateString()]: [...todosForDate],
+      };
+    });
+  };
+
   return (
     <View>
       {/* TodoList 표시 */}
       {todos &&
         todos.map((todo, index) => (
           <View key={index} style={styles.todoItem}>
+            {/* 체크박스 */}
+            <BouncyCheckbox
+              style={styles.checkbox}
+              size={16}
+              fillColor="red"
+              unfillColor="#FFFFFF"
+              iconStyle={{ borderColor: "white" }}
+              textStyle={{ fontFamily: "JosefinSans-Regular" }}
+              isChecked={todo.completed}
+              onPress={() => toggleComplete(index)}
+            />
             {/* Todo 텍스트 */}
             <TouchableOpacity onPress={() => console.log("Edit")}>
-              <Text style={styles.todoText}>{todo}</Text>
+              <Text
+                style={[
+                  styles.todoText,
+                  todo.completed && styles.completedTodo,
+                ]}
+              >
+                {todo.text}
+              </Text>
             </TouchableOpacity>
             {/* 삭제 버튼 */}
             <TouchableOpacity onPress={() => deleteTodo(index)}>
-              <Text style={styles.deleteButton}>x</Text>
+              <Fontisto name="trash" size={17} color="darkgray" />
             </TouchableOpacity>
           </View>
         ))}
@@ -59,40 +75,23 @@ function TodoList({ todos, setTodos, currentDate }) {
 
 const styles = StyleSheet.create({
   todoItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    backgroundColor: "rgba(52, 52, 52, 0.1)",
     marginBottom: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 30,
+    borderRadius: 15,
+    flexDirection: "row",
+    // alignItems: "center",
+    justifyContent: "space-between",
   },
   todoText: {
-    flex: 1,
     fontSize: 16,
+    fontWeight: "500",
   },
-  deleteButton: {
-    fontSize: 16,
-    color: "red",
-    marginLeft: 10,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    marginTop: 20,
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
-  },
-  addButton: {
-    backgroundColor: "blue",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
+
+  completedTodo: {
+    textDecorationLine: "line-through",
+    color: "gray",
   },
 });
 

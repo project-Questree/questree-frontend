@@ -14,6 +14,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+
+import BouncyCheckbox from "react-native-bouncy-checkbox";
+
 import TodoList from "../Controllers/ToDoList";
 
 function MainToDoScreen() {
@@ -40,7 +43,7 @@ function MainToDoScreen() {
         ...todoLists,
         [currentDate.toDateString()]: [
           ...(todoLists[currentDate.toDateString()] || []),
-          newTodo,
+          { text: newTodo, completed: false },
         ],
       });
       setNewTodo("");
@@ -56,14 +59,15 @@ function MainToDoScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.navBar}>
         <TouchableOpacity onPress={handlePreviousDay}>
-          <Text style={styles.switchDateBtn}>{"<"}</Text>
+          <Text style={styles.switchDateBtn}>{"◀"}</Text>
         </TouchableOpacity>
         <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
         <TouchableOpacity onPress={handleNextDay}>
-          <Text style={styles.switchDateBtn}>{">"}</Text>
+          <Text style={styles.switchDateBtn}>{"▶"}</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.todoList}>
+
+      <View style={styles.BodyContainer}>
         <TodoList
           todos={todoLists[currentDate.toDateString()]}
           setTodos={setTodoLists}
@@ -115,7 +119,7 @@ function MainToDoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "off-white",
+    backgroundColor: "#fff",
   },
   navBar: {
     flexDirection: "row",
@@ -123,16 +127,42 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 30,
+    borderBottomWidth: 1.5, // 경계선 두께
+    borderBottomColor: "#ccc", // 경계선 색상
   },
   switchDateBtn: {
+    color: "gray",
     fontSize: 30,
   },
   dateText: {
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "darkgrey",
     fontSize: 20,
+    backgroundColor: "grey",
+    color: "white",
+    borderRadius: 35,
+    width: 70,
+    height: 70,
+    textAlign: "center",
+    lineHeight: 70, // Ensures the text is centered vertically
+    overflow: "hidden",
   },
-  todoList: {
+  BodyContainer: {
     flex: 1,
     padding: 20,
+    backgroundColor: "#f5f5f5", // 연한 배경색
+    borderRadius: 10, // 모서리를 둥글게
+    margin: 20, // 외부 여백
+    shadowColor: "#000", // 그림자 색상
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1, // 그림자 투명도
+    shadowRadius: 3.84, // 그림자 반경
+    elevation: 5, // 안드로이드 그림자 효과
   },
   addButton: {
     position: "absolute",
