@@ -8,47 +8,47 @@ function LoginScreen({ navigation }) {
   const [password, setPassword] = useState("");
 
   const handleLogin = () => {
-    //   let formData;
+    let formData;
 
-    //   if (nameOrEmail.includes("@")) {
-    //     formData = {
-    //       email: nameOrEmail,
-    //       password: password,
-    //     };
-    //   } else {
-    //     formData = {
-    //       name: nameOrEmail,
-    //       password: password,
-    //     };
-    //   }
+    if (nameOrEmail.includes("@")) {
+      formData = {
+        email: nameOrEmail,
+        password: password,
+      };
+    } else {
+      formData = {
+        name: nameOrEmail,
+        password: password,
+      };
+    }
 
-    //   fetch("https://api.questree.lesh.kr/login", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(formData),
-    //   })
-    //     .then((response) => {
-    //       if (response.ok) {
-    //         return response.json(); // JSON으로 응답을 받음
-    //       } else {
-    //         throw new Error("로그인 실패"); // 로그인 실패 시 에러 처리
-    //       }
-    //     })
-    //     .then((data) => {
-    //       const { accessToken, refreshToken } = data;
+    fetch("https://api.questree.lesh.kr/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json(); // JSON으로 응답을 받음
+        } else {
+          throw new Error("로그인 실패"); // 로그인 실패 시 에러 처리
+        }
+      })
+      .then((data) => {
+        const { accessToken, refreshToken } = data;
 
-    //       // 토큰을 async storage에 저장
-    //       AsyncStorage.setItem("accessToken", accessToken);
-    //       AsyncStorage.setItem("refreshToken", refreshToken);
+        // 토큰을 async storage에 저장
+        AsyncStorage.setItem("accessToken", accessToken);
+        AsyncStorage.setItem("refreshToken", refreshToken);
 
-    //       // 로그인 후 메인 화면으로 이동
-    navigation.navigate("MainToDo");
-    // })
-    // .catch((error) => {
-    //   console.error("Error:", error);
-    // });
+        // 로그인 후 메인 화면으로 이동
+        navigation.navigate("MainToDo");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
   return (
@@ -64,7 +64,7 @@ function LoginScreen({ navigation }) {
           style={styles.inputBox}
           onChangeText={setNameOrEmail}
           value={nameOrEmail}
-          placeholder="이름 또는 이메일"
+          placeholder="아이디 또는 이메일"
         />
         <Text>Password</Text>
         <TextInput

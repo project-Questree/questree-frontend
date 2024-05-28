@@ -1,6 +1,6 @@
 // MainToDoScreen.js
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -15,14 +15,13 @@ import {
   Platform,
 } from "react-native";
 
-import BouncyCheckbox from "react-native-bouncy-checkbox";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import TodoList from "../Controllers/ToDoList";
 
 function MainToDoScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [todoLists, setTodoLists] = useState({});
   const [newTodo, setNewTodo] = useState("");
+  const [todoLists, setTodoLists] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
 
   const handlePreviousDay = () => {
@@ -39,6 +38,7 @@ function MainToDoScreen() {
 
   const addTodo = () => {
     if (newTodo.trim() !== "") {
+      //trim : 앞뒤 공백 제거
       setTodoLists({
         ...todoLists,
         [currentDate.toDateString()]: [
@@ -50,11 +50,13 @@ function MainToDoScreen() {
       setModalVisible(false);
     }
   };
+
   const formatDate = (date) => {
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}/${day}`;
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.navBar}>
@@ -74,25 +76,27 @@ function MainToDoScreen() {
           currentDate={currentDate}
         />
       </View>
-      {/* 추가 버튼 */}
+      {/* 모달 띄우기 버튼 */}
       <TouchableOpacity
-        style={styles.addButton}
+        style={styles.floatingPlusButton}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.buttonText}>+</Text>
+        <Text style={styles.floatingPlusButtonText}>+</Text>
       </TouchableOpacity>
-      {/* 모달 */}
+
+      {/* AddToDo모달 */}
       <Modal
         animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
-          setModalVisible(false);
+          setModalVisible(!modalVisible);
         }}
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
+
         <KeyboardAvoidingView
           style={styles.modalContainer}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -100,13 +104,14 @@ function MainToDoScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>해야 할 일을 입력하세요.</Text>
             <TextInput
-              style={styles.input}
+              style={styles.AddTodoinput}
               value={newTodo}
               onChangeText={setNewTodo}
               placeholder="Add a new todo"
               autoFocus={true}
             />
-            <TouchableOpacity style={styles.addButton} onPress={addTodo}>
+
+            <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
               <Text style={styles.buttonText}>+</Text>
             </TouchableOpacity>
           </View>
@@ -164,7 +169,33 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84, // 그림자 반경
     elevation: 5, // 안드로이드 그림자 효과
   },
-  addButton: {
+  floatingPlusButton: {
+    position: "absolute",
+
+    backgroundColor: "grey",
+    bottom: 30,
+    right: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  floatingPlusButtonText: {
+    color: "#fff",
+    fontSize: 32,
+  },
+
+  addTodoButton: {
     position: "absolute",
     bottom: 35,
     right: 40,
@@ -188,9 +219,14 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   modalContainer: {
-    flex: 1,
+    flex: 2,
     justifyContent: "center",
-    alignItems: "center",
+    // alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 17,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
   modalContent: {
     backgroundColor: "#fff",
@@ -198,29 +234,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 5,
   },
-  input: {
+  AddTodoinput: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 20,
-    width: 200,
+    width: 250,
     height: 40,
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  addTodoButton: {
-    backgroundColor: "blue",
-    borderRadius: 5,
-    paddingVertical: 10,
-    alignItems: "center",
   },
 });
 

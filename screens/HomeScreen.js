@@ -8,25 +8,17 @@ function HomeScreen() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => navigation.navigate("Login"), 2000);
-
     return () => clearTimeout(timeoutId);
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-      <StatusBar style="auto" />
       <Text style={styles.titleText}>Questree</Text>
       <Text style={styles.subTitleText}>당신의 모든 일정을 한 손에</Text>
-
       <Image
         source={require("../assets/tree-icon.png")}
         style={styles.treeImg}
       />
-      {/* <Button
-        style={styles.loginBtn}
-        title="시작하기"
-        onPress={() => navigation.navigate("Login")}
-      /> */}
     </View>
   );
 }
@@ -56,12 +48,6 @@ const styles = StyleSheet.create({
     width: 400,
     height: 400,
     marginBottom: 20,
-  },
-  loginBtn: {
-    color: "gray",
-    borderRadius: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
   },
 });
 
