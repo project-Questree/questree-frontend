@@ -59,7 +59,7 @@ function TodoList({ todos, setTodos, currentDate }) {
                   todo.completed && styles.completedTodo,
                 ]}
               >
-                {todo.text}
+                {todo.content}
               </Text>
             </TouchableOpacity>
             {/* 삭제 버튼 */}

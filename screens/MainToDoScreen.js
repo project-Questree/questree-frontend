@@ -15,14 +15,86 @@ import {
   Platform,
 } from "react-native";
 
+import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TodoList from "../Controllers/ToDoList";
+import WeeklyField from "../components/WeeklyField";
+import CountField from "../components/CountField";
+
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+
+// 저장 함수
+
+async function saveTodoLists(todoLists) {
+  try {
+    const todoListsToSave = Object.entries(todoLists).map(([key, value]) => [
+      `todo-${key}`, // 접두사 추가
+      JSON.stringify(value),
+    ]);
+    await AsyncStorage.multiSet(todoListsToSave);
+  } catch (error) {
+    console.error("Error saving todo lists:", error);
+  }
+}
+
+// 불러오기 함수
+async function loadTodoLists() {
+  try {
+    const allKeys = await AsyncStorage.getAllKeys();
+    const todoListKeys = allKeys.filter((key) => key.startsWith("todo-")); // 접두사로 필터링
+    const result = await AsyncStorage.multiGet(todoListKeys);
+    const todoLists = {};
+    result.forEach(([key, value]) => {
+      try {
+        todoLists[key.replace("todo-", "")] = JSON.parse(value); // 접두사 제거
+      } catch (error) {
+        console.warn(`Invalid JSON data for key ${key}:`, error);
+        todoLists[key.replace("todo-", "")] = [];
+      }
+    });
+    return todoLists;
+  } catch (error) {
+    console.error("Error loading todo lists:", error);
+    return {};
+  }
+}
 
 function MainToDoScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [newTodo, setNewTodo] = useState("");
   const [todoLists, setTodoLists] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
+  const [floatingPlusButtonVisible, setFloatingPlusButtonVisible] =
+    useState(true);
+
+  const [todoType, setTodoType] = useState("TODO");
+  const [targetedDays, setTargetedDays] = useState([]); // targetedDays 상태 추가
+  const [resetDay, setResetDay] = useState(0); // 0: 일요일
+  const [countData, setCountData] = useState({
+    startDate: "",
+    endDate: "",
+    intervals: 0,
+    repeatCount: 0,
+  });
+
+  const [selectedType, setSelectedType] = useState("TODO"); // 선택된 타입 상태
+  const handleTypePress = (type) => {
+    setSelectedType(type); // 선택된 타입 변경
+    setTodoType(type); // todoType 변경 (API 요청에 사용)
+  };
+
+  useEffect(() => {
+    const loadTodos = async () => {
+      const storedTodoLists = await loadTodoLists();
+      setTodoLists(storedTodoLists);
+    };
+
+    loadTodos();
+  }, []); // 컴포넌트 마운트 시에만 실행
+
+  useEffect(() => {
+    saveTodoLists(todoLists); // todoLists 상태가 변경될 때마다 저장
+  }, [todoLists]);
 
   const handlePreviousDay = () => {
     const previousDay = new Date(currentDate);
@@ -36,18 +108,79 @@ function MainToDoScreen() {
     setCurrentDate(nextDay);
   };
 
-  const addTodo = () => {
+  const addTodo = async () => {
     if (newTodo.trim() !== "") {
-      //trim : 앞뒤 공백 제거
-      setTodoLists({
-        ...todoLists,
-        [currentDate.toDateString()]: [
-          ...(todoLists[currentDate.toDateString()] || []),
-          { text: newTodo, completed: false },
-        ],
-      });
-      setNewTodo("");
-      setModalVisible(false);
+      let newTodoItem = {
+        content: newTodo,
+        type: todoType,
+        // targetedDay: null, // 빈 배열로 초기화
+        // resetDay: null,
+        // startDate: null,
+        // endDate: null,
+        // intervals: null,
+        // repeatCount: null,
+      };
+
+      console.log("새로운 할 일 항목:", newTodoItem);
+
+      try {
+        const accessToken = await AsyncStorage.getItem("accessToken");
+        const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+        const response = await fetch("https://api.questree.lesh.kr/plans/new", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: accessToken, // accessToken 헤더 추가
+            "X-Refresh-Token": refreshToken, // refreshToken 헤더 추가 (필요한 경우)
+          },
+          body: JSON.stringify(newTodoItem),
+        });
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok.");
+        }
+
+        const contentType = response.headers.get("content-type");
+        let data;
+        if (contentType && contentType.includes("application/json")) {
+          // JSON 형식일 경우에만 JSON 파싱 시도
+          data = await response.json();
+        } else {
+          // JSON 형식이 아닐 경우 텍스트로 처리
+          data = await response.text();
+        }
+
+        console.log("API 응답:", data);
+
+        // 성공적으로 API 요청을 보낸 후, todoLists 상태 업데이트
+        setTodoLists((prevTodoLists) => ({
+          ...prevTodoLists,
+          [currentDate.toDateString()]: [
+            ...(prevTodoLists[currentDate.toDateString()] || []),
+            newTodoItem,
+          ],
+        }));
+      } catch (error) {
+        console.error("API 요청 실패:", error);
+        if (error instanceof SyntaxError && error.message.includes("JSON")) {
+          // JSON 파싱 에러 처리
+          console.error("API 응답이 올바른 JSON 형식이 아닙니다.");
+        }
+      } finally {
+        setNewTodo("");
+        setTodoType("TODO");
+        setModalVisible(false);
+        setFloatingPlusButtonVisible(true);
+        setTargetedDays([]);
+        setResetDay(0);
+        setCountData({
+          startDate: "",
+          endDate: "",
+          intervals: 0,
+          repeatCount: 0,
+        });
+      }
     }
   };
 
@@ -78,8 +211,14 @@ function MainToDoScreen() {
       </View>
       {/* 모달 띄우기 버튼 */}
       <TouchableOpacity
-        style={styles.floatingPlusButton}
-        onPress={() => setModalVisible(true)}
+        style={[
+          styles.floatingPlusButton,
+          !floatingPlusButtonVisible && { display: "none" },
+        ]}
+        onPress={() => {
+          setModalVisible(true);
+          setFloatingPlusButtonVisible(false);
+        }}
       >
         <Text style={styles.floatingPlusButtonText}>+</Text>
       </TouchableOpacity>
@@ -91,9 +230,15 @@ function MainToDoScreen() {
         visible={modalVisible}
         onRequestClose={() => {
           setModalVisible(!modalVisible);
+          setFloatingPlusButtonVisible(true);
         }}
       >
-        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+        <TouchableWithoutFeedback
+          onPress={() => {
+            setModalVisible(false);
+            setFloatingPlusButtonVisible(true);
+          }}
+        >
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
 
@@ -101,20 +246,70 @@ function MainToDoScreen() {
           style={styles.modalContainer}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>해야 할 일을 입력하세요.</Text>
-            <TextInput
-              style={styles.AddTodoinput}
-              value={newTodo}
-              onChangeText={setNewTodo}
-              placeholder="Add a new todo"
-              autoFocus={true}
-            />
+          <ScrollView style={styles.modalContent}>
+            <View>
+              <Text style={styles.modalTitle}>To Do :</Text>
+              <TextInput
+                style={styles.AddTodoinput}
+                value={newTodo}
+                onChangeText={setNewTodo}
+                placeholder="Add a new todo"
+                autoFocus={true}
+              />
+            </View>
 
-            <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
-              <Text style={styles.buttonText}>+</Text>
-            </TouchableOpacity>
-          </View>
+            <View style={styles.typeButtonsContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  selectedType === "TODO" && styles.selectedTypeButton,
+                ]}
+                onPress={() => handleTypePress("TODO")}
+              >
+                <Text style={styles.typeButtonText}>TODO</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  selectedType === "WEEKLY" && styles.selectedTypeButton,
+                ]}
+                onPress={() => handleTypePress("WEEKLY")}
+              >
+                <Text style={styles.typeButtonText}>WEEKLY</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  selectedType === "COUNT" && styles.selectedTypeButton,
+                ]}
+                onPress={() => handleTypePress("COUNT")}
+              >
+                <Text style={styles.typeButtonText}>COUNT</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* 조건부 렌더링 (TODO일 경우 아무것도 렌더링하지 않음) */}
+            {selectedType === "WEEKLY" && (
+              <WeeklyField
+                targetedDays={targetedDays}
+                resetDay={resetDay}
+                onTargetedDaysChange={setTargetedDays}
+                onResetDayChange={setResetDay}
+              />
+            )}
+            {selectedType === "COUNT" && (
+              <CountField
+                countData={countData}
+                onCountDataChange={setCountData}
+              />
+            )}
+
+            <View style={styles.addTodoButtonContainer}>
+              <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
+                <Text style={styles.buttonText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
     </SafeAreaView>
@@ -194,7 +389,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 32,
   },
-
+  addButtonContainer: {
+    position: "absolute",
+    bottom: 20, // 아래 여백
+    right: 20, // 오른쪽 여백
+  },
   addTodoButton: {
     position: "absolute",
     bottom: 35,
@@ -215,11 +414,12 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonText: {
+    position: "absolute",
     color: "#fff",
     fontSize: 30,
   },
   modalContainer: {
-    flex: 2,
+    flex: 4,
     justifyContent: "center",
     // alignItems: "center",
   },
@@ -247,6 +447,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
+  todoTypePicker: {
+    position: "absolute",
+    height: 0,
+    width: "100%",
+    marginBottom: 0,
+  },
+  typeButtonsContainer: {
+    flexDirection: "row", // 가로 배치로 변경
+    justifyContent: "space-around",
+    marginBottom: 20,
+  },
+  typeButtonText: {},
 });
 
 export default MainToDoScreen;
