@@ -7,13 +7,13 @@ import {
   TouchableOpacity,
   Button,
 } from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import DatePicker from "react-native-date-picker"; // DatePicker import
 
 const CountField = ({ countData, onCountDataChange }) => {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
-  const handleStartDateConfirm = (date) => {
+  const handleStartDateChange = (date) => {
     setShowStartDatePicker(false);
     onCountDataChange({
       ...countData,
@@ -21,7 +21,7 @@ const CountField = ({ countData, onCountDataChange }) => {
     });
   };
 
-  const handleEndDateConfirm = (date) => {
+  const handleEndDateChange = (date) => {
     setShowEndDatePicker(false);
     onCountDataChange({
       ...countData,
@@ -32,56 +32,76 @@ const CountField = ({ countData, onCountDataChange }) => {
   return (
     <View style={styles.container}>
       {/* Start Date */}
-      <Text style={styles.label}>Start Date:</Text>
-      <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
-        <Text>{countData.startDate || "Select Date"}</Text>
-      </TouchableOpacity>
-      <DateTimePickerModal
-        isVisible={showStartDatePicker}
-        mode="date"
-        onConfirm={handleStartDateConfirm}
-        onCancel={() => setShowStartDatePicker(false)}
-      />
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>Start Date:</Text>
+        <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
+          <Text style={styles.dateButtonText}>
+            {countData.startDate || "Select Date"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {showStartDatePicker && (
+        <DatePicker
+          modal
+          mode="date"
+          open={showStartDatePicker}
+          date={new Date(countData.startDate || Date.now())}
+          onConfirm={handleStartDateChange}
+          onCancel={() => setShowStartDatePicker(false)}
+        />
+      )}
 
       {/* End Date */}
-      <Text style={styles.label}>End Date:</Text>
-      <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
-        <Text>{countData.endDate || "Select Date"}</Text>
-      </TouchableOpacity>
-      <DateTimePickerModal
-        isVisible={showEndDatePicker}
-        mode="date"
-        onConfirm={handleEndDateConfirm}
-        onCancel={() => setShowEndDatePicker(false)}
-      />
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>End Date:</Text>
+        <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
+          <Text style={styles.dateButtonText}>
+            {countData.endDate || "Select Date"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {showEndDatePicker && (
+        <DatePicker
+          modal
+          mode="date"
+          open={showEndDatePicker}
+          date={new Date(countData.endDate || Date.now())}
+          onConfirm={handleEndDateChange}
+          onCancel={() => setShowEndDatePicker(false)}
+        />
+      )}
 
       {/* Intervals */}
-      <Text style={styles.label}>Intervals (days):</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        value={countData.intervals.toString()}
-        onChangeText={(text) =>
-          onCountDataChange({
-            ...countData,
-            intervals: parseInt(text) || 0, // 숫자 변환 및 기본값 0 설정
-          })
-        }
-      />
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>Intervals (days):</Text>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          value={countData.intervals.toString()}
+          onChangeText={(text) =>
+            onCountDataChange({
+              ...countData,
+              intervals: parseInt(text) || 0, // 숫자 변환 및 기본값 0 설정
+            })
+          }
+        />
+      </View>
 
       {/* Repeat Count */}
-      <Text style={styles.label}>Repeat Count:</Text>
-      <TextInput
-        style={styles.input}
-        keyboardType="numeric"
-        value={countData.repeatCount.toString()}
-        onChangeText={(text) =>
-          onCountDataChange({
-            ...countData,
-            repeatCount: parseInt(text) || 0, // 숫자 변환 및 기본값 0 설정
-          })
-        }
-      />
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>Repeat Count:</Text>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          value={countData.repeatCount.toString()}
+          onChangeText={(text) =>
+            onCountDataChange({
+              ...countData,
+              repeatCount: parseInt(text) || 0, // 숫자 변환 및 기본값 0 설정
+            })
+          }
+        />
+      </View>
     </View>
   );
 };

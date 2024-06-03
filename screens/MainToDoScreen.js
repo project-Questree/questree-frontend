@@ -21,53 +21,13 @@ import TodoList from "../Controllers/ToDoList";
 import WeeklyField from "../components/WeeklyField";
 import CountField from "../components/CountField";
 
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-
-// 저장 함수
-
-async function saveTodoLists(todoLists) {
-  try {
-    const todoListsToSave = Object.entries(todoLists).map(([key, value]) => [
-      `todo-${key}`, // 접두사 추가
-      JSON.stringify(value),
-    ]);
-    await AsyncStorage.multiSet(todoListsToSave);
-  } catch (error) {
-    console.error("Error saving todo lists:", error);
-  }
-}
-
-// 불러오기 함수
-async function loadTodoLists() {
-  try {
-    const allKeys = await AsyncStorage.getAllKeys();
-    const todoListKeys = allKeys.filter((key) => key.startsWith("todo-")); // 접두사로 필터링
-    const result = await AsyncStorage.multiGet(todoListKeys);
-    const todoLists = {};
-    result.forEach(([key, value]) => {
-      try {
-        todoLists[key.replace("todo-", "")] = JSON.parse(value); // 접두사 제거
-      } catch (error) {
-        console.warn(`Invalid JSON data for key ${key}:`, error);
-        todoLists[key.replace("todo-", "")] = [];
-      }
-    });
-    return todoLists;
-  } catch (error) {
-    console.error("Error loading todo lists:", error);
-    return {};
-  }
-}
-
 function MainToDoScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [newTodo, setNewTodo] = useState("");
   const [todoLists, setTodoLists] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
-  const [floatingPlusButtonVisible, setFloatingPlusButtonVisible] =
-    useState(true);
-
   const [todoType, setTodoType] = useState("TODO");
+  const [selectedType, setSelectedType] = useState("TODO"); // 선택된 타입 상태
   const [targetedDays, setTargetedDays] = useState([]); // targetedDays 상태 추가
   const [resetDay, setResetDay] = useState(0); // 0: 일요일
   const [countData, setCountData] = useState({
@@ -76,25 +36,54 @@ function MainToDoScreen() {
     intervals: 0,
     repeatCount: 0,
   });
-
-  const [selectedType, setSelectedType] = useState("TODO"); // 선택된 타입 상태
+  const [floatingPlusButtonVisible, setFloatingPlusButtonVisible] =
+    useState(true);
   const handleTypePress = (type) => {
-    setSelectedType(type); // 선택된 타입 변경
+    setSelectedType(type); // 선택된 타입 변경 (UI에 사용)
     setTodoType(type); // todoType 변경 (API 요청에 사용)
   };
 
   useEffect(() => {
-    const loadTodos = async () => {
-      const storedTodoLists = await loadTodoLists();
-      setTodoLists(storedTodoLists);
+    const fetchTodos = async () => {
+      try {
+        const accessToken = await AsyncStorage.getItem("accessToken"); // 토큰 가져오기
+        const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+        const response = await fetch("https://api.questree.lesh.kr/plans", {
+          method: "GET",
+          headers: {
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
+        });
+
+        console.log(response);
+        console.log("hihi");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch todo lists");
+        }
+
+        const data = await response.json();
+
+        // API 응답 형식에 맞게 todoLists 상태 업데이트
+        // 예시: data가 할 일 배열일 경우
+        setTodoLists({
+          [today]: data.map((todo) => ({
+            content: todo.content,
+            completed: todo.completed,
+            type: todo.type,
+            // 필요에 따라 다른 필드 추가 (targetedDay, resetDay, startDate, endDate, intervals, repeatCount)
+          })),
+        });
+      } catch (error) {
+        console.error("Error fetching todo lists:", error);
+        // TODO: 에러 처리 (예: 사용자에게 알림)
+      }
     };
 
-    loadTodos();
-  }, []); // 컴포넌트 마운트 시에만 실행
-
-  useEffect(() => {
-    saveTodoLists(todoLists); // todoLists 상태가 변경될 때마다 저장
-  }, [todoLists]);
+    fetchTodos();
+  }, [currentDate]);
 
   const handlePreviousDay = () => {
     const previousDay = new Date(currentDate);

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, Button, TextInput } from "react-native";
 import MainToDoScreen from "./MainToDoScreen";
+import RegisterScreen from "./RegisterScreen";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function LoginScreen({ navigation }) {
@@ -44,7 +46,7 @@ function LoginScreen({ navigation }) {
         AsyncStorage.setItem("refreshToken", refreshToken);
 
         // 로그인 후 메인 화면으로 이동
-        navigation.navigate("MainToDo");
+        navigation.navigate("Example");
       })
       .catch((error) => {
         console.error("Error:", error);
@@ -76,7 +78,7 @@ function LoginScreen({ navigation }) {
         />
         <Button title="로그인" onPress={handleLogin} color="#8c6b52" />
         <Button
-          title="이메일로 회원가입"
+          title="회원가입"
           onPress={() => navigation.navigate("Register")}
           color="gray"
         />
