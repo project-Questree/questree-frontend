@@ -46,7 +46,7 @@ function LoginScreen({ navigation }) {
         AsyncStorage.setItem("refreshToken", refreshToken);
 
         // 로그인 후 메인 화면으로 이동
-        navigation.navigate("Example");
+        navigation.navigate("MainToDo");
       })
       .catch((error) => {
         console.error("Error:", error);

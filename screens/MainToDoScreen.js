@@ -13,6 +13,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  FlatList,
 } from "react-native";
 
 import { Picker } from "@react-native-picker/picker";
@@ -20,11 +21,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import TodoList from "../Controllers/ToDoList";
 import WeeklyField from "../components/WeeklyField";
 import CountField from "../components/CountField";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 
 function MainToDoScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [newTodo, setNewTodo] = useState("");
-  const [todoLists, setTodoLists] = useState({});
+  const [todoLists, setTodoLists] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [todoType, setTodoType] = useState("TODO");
   const [selectedType, setSelectedType] = useState("TODO"); // 선택된 타입 상태
@@ -42,48 +44,35 @@ function MainToDoScreen() {
     setSelectedType(type); // 선택된 타입 변경 (UI에 사용)
     setTodoType(type); // todoType 변경 (API 요청에 사용)
   };
+  const [isLoading, setIsLoading] = useState(true); // isLoading 상태 추가
+  const [error, setError] = useState(null); // error 상태 추가
 
-  useEffect(() => {
-    const fetchTodos = async () => {
-      try {
-        const accessToken = await AsyncStorage.getItem("accessToken"); // 토큰 가져오기
-        const refreshToken = await AsyncStorage.getItem("refreshToken");
+  const fetchTodos = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken"); // 토큰 가져오기
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
 
-        const response = await fetch("https://api.questree.lesh.kr/plans", {
-          method: "GET",
-          headers: {
-            Authorization: accessToken,
-            "X-Refresh-Token": refreshToken,
-          },
-        });
+      const response = await fetch("https://api.questree.lesh.kr/plans", {
+        method: "GET",
+        headers: {
+          Authorization: accessToken,
+          "X-Refresh-Token": refreshToken,
+        },
+      });
 
-        console.log(response);
-        console.log("hihi");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch todo lists");
-        }
-
-        const data = await response.json();
-
-        // API 응답 형식에 맞게 todoLists 상태 업데이트
-        // 예시: data가 할 일 배열일 경우
-        setTodoLists({
-          [today]: data.map((todo) => ({
-            content: todo.content,
-            completed: todo.completed,
-            type: todo.type,
-            // 필요에 따라 다른 필드 추가 (targetedDay, resetDay, startDate, endDate, intervals, repeatCount)
-          })),
-        });
-      } catch (error) {
-        console.error("Error fetching todo lists:", error);
-        // TODO: 에러 처리 (예: 사용자에게 알림)
+      if (!response.ok) {
+        throw new Error("Failed to fetch todo lists");
       }
-    };
 
-    fetchTodos();
-  }, [currentDate]);
+      const data = await response.json();
+      setTodoLists(data); // API 응답 데이터를 상태에 저장
+    } catch (error) {
+      setError(error.message);
+      console.error("Error fetching todo lists:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePreviousDay = () => {
     const previousDay = new Date(currentDate);
@@ -102,6 +91,7 @@ function MainToDoScreen() {
       let newTodoItem = {
         content: newTodo,
         type: todoType,
+        isContinue: true,
         // targetedDay: null, // 빈 배열로 초기화
         // resetDay: null,
         // startDate: null,
@@ -143,13 +133,11 @@ function MainToDoScreen() {
         console.log("API 응답:", data);
 
         // 성공적으로 API 요청을 보낸 후, todoLists 상태 업데이트
-        setTodoLists((prevTodoLists) => ({
-          ...prevTodoLists,
-          [currentDate.toDateString()]: [
-            ...(prevTodoLists[currentDate.toDateString()] || []),
-            newTodoItem,
-          ],
-        }));
+        // 성공적으로 API 요청을 보낸 후, todoLists 상태 업데이트
+        setTodoLists((prevTodoLists) => [
+          ...prevTodoLists, // 기존 todoLists 배열 유지
+          newTodoItem, // 새로운 할 일 항목 추가
+        ]);
       } catch (error) {
         console.error("API 요청 실패:", error);
         if (error instanceof SyntaxError && error.message.includes("JSON")) {
@@ -179,6 +167,90 @@ function MainToDoScreen() {
     return `${month}/${day}`;
   };
 
+  const renderItem = ({ item }) => (
+    <View style={styles.todoItem}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <BouncyCheckbox
+          style={styles.checkbox}
+          size={16}
+          fillColor="red"
+          unfillColor="#FFFFFF"
+          iconStyle={{ borderColor: "white" }}
+          textStyle={{ fontFamily: "JosefinSans-Regular" }}
+          isChecked={!item.isContinue} // isContinue가 false일 때 체크되도록 변경
+          onPress={async (isChecked) => {
+            try {
+              const accessToken = await AsyncStorage.getItem("accessToken");
+              const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+              const response = await fetch(
+                `https://api.questree.lesh.kr/plans/checked/${item.id}`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: accessToken,
+                    "X-Refresh-Token": refreshToken,
+                  },
+                  // body: JSON.stringify({
+                  //   isContinue: !isChecked, // 반전된 값 전송
+                  // }),
+                },
+              );
+
+              if (!response.ok) {
+                throw new Error("Failed to update todo");
+              }
+
+              // API 요청 성공 후 할 일 목록 다시 가져오기
+              fetchTodos();
+            } catch (error) {
+              console.error("Error updating todo:", error);
+              // 에러 처리 (예: 사용자에게 알림)
+            }
+          }}
+        />
+        <Text style={styles.todoContent}>{item.content}</Text>
+      </View>
+      <Text style={styles.todoType}>({item.type})</Text>
+      <TouchableOpacity onPress={() => handleDeleteTodo(item.id)}>
+        <Text style={styles.deleteButton}>❌</Text>
+      </TouchableOpacity>
+    </View>
+  );
+  const handleDeleteTodo = async (todoId) => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+      const response = await fetch(
+        `https://api.questree.lesh.kr/plans/delete/${todoId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete todo");
+      }
+
+      // 삭제 성공 시 todoLists 상태 업데이트
+      setTodoLists((prevTodoLists) =>
+        prevTodoLists.filter((todo) => todo.id !== todoId),
+      );
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+      // TODO: 에러 처리 (예: 사용자에게 알림)
+    }
+  };
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.navBar}>
@@ -192,11 +264,18 @@ function MainToDoScreen() {
       </View>
 
       <View style={styles.BodyContainer}>
-        <TodoList
-          todos={todoLists[currentDate.toDateString()]}
-          setTodos={setTodoLists}
-          currentDate={currentDate}
-        />
+        {isLoading ? (
+          <Text>Loading...</Text> // 로딩 중일 때 표시
+        ) : error ? (
+          <Text style={styles.errorText}>Error: {error}</Text> // 에러 발생 시 표시
+        ) : (
+          // todoLists에 데이터가 있을 때만 FlatList 렌더링
+          <FlatList
+            data={todoLists}
+            renderItem={renderItem}
+            keyExtractor={(item) => String(item.id)}
+          />
+        )}
       </View>
       {/* 모달 띄우기 버튼 */}
       <TouchableOpacity
@@ -447,7 +526,26 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     marginBottom: 20,
   },
-  typeButtonText: {},
+  todoItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // 양쪽 끝으로 정렬
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+  },
+  todoContent: {
+    fontSize: 16,
+  },
+  todoType: {
+    fontSize: 12,
+    color: "gray",
+  },
+  deleteButton: {
+    fontSize: 18,
+    marginLeft: 10,
+    color: "red",
+  },
 });
 
 export default MainToDoScreen;
