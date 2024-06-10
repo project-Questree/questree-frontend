@@ -30,11 +30,11 @@ function MainToDoScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [todoType, setTodoType] = useState("TODO");
   const [selectedType, setSelectedType] = useState("TODO"); // 선택된 타입 상태
-  const [targetedDays, setTargetedDays] = useState([]); // targetedDays 상태 추가
+  const [targetedDays, setTargetedDays] = useState("0000000"); // targetedDays 상태 추가
   const [resetDay, setResetDay] = useState(0); // 0: 일요일
   const [countData, setCountData] = useState({
-    startDate: "",
-    endDate: "",
+    startDate: null,
+    endDate: null,
     intervals: 0,
     repeatCount: 0,
   });
@@ -47,9 +47,13 @@ function MainToDoScreen() {
   const [isLoading, setIsLoading] = useState(true); // isLoading 상태 추가
   const [error, setError] = useState(null); // error 상태 추가
 
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
   const fetchTodos = async () => {
     try {
-      const accessToken = await AsyncStorage.getItem("accessToken"); // 토큰 가져오기
+      const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
 
       const response = await fetch("https://api.questree.lesh.kr/plans", {
@@ -65,7 +69,7 @@ function MainToDoScreen() {
       }
 
       const data = await response.json();
-      setTodoLists(data); // API 응답 데이터를 상태에 저장
+      setTodoLists(data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching todo lists:", error);
@@ -92,13 +96,23 @@ function MainToDoScreen() {
         content: newTodo,
         type: todoType,
         isContinue: true,
-        // targetedDay: null, // 빈 배열로 초기화
-        // resetDay: null,
-        // startDate: null,
-        // endDate: null,
-        // intervals: null,
-        // repeatCount: null,
+        targetedDays: null,
+        resetDay: null,
+        startDate: null,
+        endDate: null,
+        intervals: null,
+        repeatCount: null,
       };
+
+      if (todoType === "WEEKLY") {
+        newTodoItem.targetedDays = targetedDays;
+        newTodoItem.resetDay = resetDay;
+      } else if (todoType === "COUNT") {
+        newTodoItem.startDate = countData.startDate?.toISOString().slice(0, 10);
+        newTodoItem.endDate = countData.endDate?.toISOString().slice(0, 10);
+        newTodoItem.intervals = countData.intervals;
+        newTodoItem.repeatCount = countData.repeatCount;
+      }
 
       console.log("새로운 할 일 항목:", newTodoItem);
 
@@ -110,8 +124,8 @@ function MainToDoScreen() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: accessToken, // accessToken 헤더 추가
-            "X-Refresh-Token": refreshToken, // refreshToken 헤더 추가 (필요한 경우)
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
           },
           body: JSON.stringify(newTodoItem),
         });
@@ -131,13 +145,7 @@ function MainToDoScreen() {
         }
 
         console.log("API 응답:", data);
-
-        // 성공적으로 API 요청을 보낸 후, todoLists 상태 업데이트
-        // 성공적으로 API 요청을 보낸 후, todoLists 상태 업데이트
-        setTodoLists((prevTodoLists) => [
-          ...prevTodoLists, // 기존 todoLists 배열 유지
-          newTodoItem, // 새로운 할 일 항목 추가
-        ]);
+        fetchTodos(); // 투두리스트를 다시 불러온다.
       } catch (error) {
         console.error("API 요청 실패:", error);
         if (error instanceof SyntaxError && error.message.includes("JSON")) {
@@ -147,13 +155,14 @@ function MainToDoScreen() {
       } finally {
         setNewTodo("");
         setTodoType("TODO");
+        setSelectedType("TODO");
         setModalVisible(false);
         setFloatingPlusButtonVisible(true);
-        setTargetedDays([]);
+        setTargetedDays("0000000"); // targetedDays 초기화
         setResetDay(0);
         setCountData({
-          startDate: "",
-          endDate: "",
+          startDate: null,
+          endDate: null,
           intervals: 0,
           repeatCount: 0,
         });

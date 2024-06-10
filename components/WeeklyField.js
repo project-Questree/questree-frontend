@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Picker } from "@react-native-picker/picker";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
@@ -10,25 +9,29 @@ const WeeklyField = ({
   onTargetedDaysChange,
   onResetDayChange,
 }) => {
+  const [selectedDaysString, setSelectedDaysString] = useState(targetedDays);
+
+  useEffect(() => {
+    setSelectedDaysString(String(targetedDays));
+  }, [targetedDays]);
+
   const toggleTargetedDay = (dayIndex) => {
-    const newTargetedDays = [...targetedDays];
-    const index = newTargetedDays.indexOf(dayIndex);
-    if (index > -1) {
-      newTargetedDays.splice(index, 1); // 이미 선택된 경우 제거
-    } else {
-      newTargetedDays.push(dayIndex); // 선택되지 않은 경우 추가
-    }
-    onTargetedDaysChange(newTargetedDays);
+    const newSelectedDaysString = selectedDaysString
+      .split("")
+      .map((char, index) =>
+        index === dayIndex ? (char === "1" ? "0" : "1") : char,
+      )
+      .join("");
+    setSelectedDaysString(newSelectedDaysString);
+    onTargetedDaysChange(newSelectedDaysString);
   };
 
-  const getTargetedDaysString = () => {
-    return daysOfWeek
-      .map((_, index) => (targetedDays.includes(index) ? "1" : "0"))
-      .join("");
-  };
+  useEffect(() => {
+    // selectedDaysString 상태가 변경될 때마다 UI 업데이트
+  }, [selectedDaysString]);
 
   return (
-    <View style={styles.container}>
+    <View style={styles.WeeklyContainer}>
       <Text style={styles.label}>Targeted Days:</Text>
       <View style={styles.buttonContainer}>
         {daysOfWeek.map((day, index) => (
@@ -36,7 +39,7 @@ const WeeklyField = ({
             key={index}
             style={[
               styles.button,
-              targetedDays.includes(index) && styles.selectedButton,
+              selectedDaysString[index] === "1" && styles.selectedButton,
             ]}
             onPress={() => toggleTargetedDay(index)}
           >
@@ -62,7 +65,6 @@ const WeeklyField = ({
       </View>
 
       {/* 추가된 부분: 현재 선택된 요일 문자열 표시 */}
-      <Text>Selected Days: {getTargetedDaysString()}</Text>
     </View>
   );
 };

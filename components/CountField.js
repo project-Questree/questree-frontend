@@ -5,75 +5,78 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  Button,
 } from "react-native";
-import DatePicker from "react-native-date-picker"; // DatePicker import
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 
 const CountField = ({ countData, onCountDataChange }) => {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [startDate, setStartDate] = useState(
+    countData.startDate ? new Date(countData.startDate) : null,
+  );
+  const [endDate, setEndDate] = useState(
+    countData.endDate ? new Date(countData.endDate) : null,
+  );
 
-  const handleStartDateChange = (date) => {
-    setShowStartDatePicker(false);
-    onCountDataChange({
-      ...countData,
-      startDate: date ? date.toISOString().slice(0, 10) : "",
-    });
+  const formatDate = (date) => {
+    return format(date, "yyyy년 MM월 dd일 (E)", { locale: ko });
   };
 
-  const handleEndDateChange = (date) => {
+  const handleStartDateConfirm = (date) => {
+    setShowStartDatePicker(false);
+    setStartDate(date); // Date 객체로 저장
+    onCountDataChange({ ...countData, startDate: date }); // Date 객체 전달
+  };
+
+  const handleEndDateConfirm = (date) => {
     setShowEndDatePicker(false);
-    onCountDataChange({
-      ...countData,
-      endDate: date ? date.toISOString().slice(0, 10) : "",
-    });
+    setEndDate(date); // Date 객체로 저장
+    onCountDataChange({ ...countData, endDate: date }); // Date 객체 전달
   };
 
   return (
     <View style={styles.container}>
       {/* Start Date */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Start Date:</Text>
+        <Text style={styles.label}>시작 날짜:</Text>
         <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
           <Text style={styles.dateButtonText}>
-            {countData.startDate || "Select Date"}
+            {startDate ? formatDate(startDate) : "날짜 선택"}
           </Text>
         </TouchableOpacity>
       </View>
-      {showStartDatePicker && (
-        <DatePicker
-          modal
-          mode="date"
-          open={showStartDatePicker}
-          date={new Date(countData.startDate || Date.now())}
-          onConfirm={handleStartDateChange}
-          onCancel={() => setShowStartDatePicker(false)}
-        />
-      )}
+      <DateTimePickerModal
+        isVisible={showStartDatePicker}
+        textColor="black"
+        mode="date"
+        locale="ko-KR"
+        onConfirm={handleStartDateConfirm}
+        onCancel={() => setShowStartDatePicker(false)}
+      />
 
       {/* End Date */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>End Date:</Text>
+        <Text style={styles.label}>종료 날짜:</Text>
         <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
           <Text style={styles.dateButtonText}>
-            {countData.endDate || "Select Date"}
+            {endDate ? formatDate(endDate) : "날짜 선택"}
           </Text>
         </TouchableOpacity>
       </View>
-      {showEndDatePicker && (
-        <DatePicker
-          modal
-          mode="date"
-          open={showEndDatePicker}
-          date={new Date(countData.endDate || Date.now())}
-          onConfirm={handleEndDateChange}
-          onCancel={() => setShowEndDatePicker(false)}
-        />
-      )}
+      <DateTimePickerModal
+        isVisible={showEndDatePicker}
+        textColor="black"
+        mode="date"
+        locale="ko-KR"
+        onConfirm={handleEndDateConfirm}
+        onCancel={() => setShowEndDatePicker(false)}
+      />
 
       {/* Intervals */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Intervals (days):</Text>
+        <Text style={styles.label}>간격 (일):</Text>
         <TextInput
           style={styles.input}
           keyboardType="numeric"
@@ -81,7 +84,7 @@ const CountField = ({ countData, onCountDataChange }) => {
           onChangeText={(text) =>
             onCountDataChange({
               ...countData,
-              intervals: parseInt(text) || 0, // 숫자 변환 및 기본값 0 설정
+              intervals: parseInt(text) || 0,
             })
           }
         />
@@ -89,7 +92,7 @@ const CountField = ({ countData, onCountDataChange }) => {
 
       {/* Repeat Count */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>Repeat Count:</Text>
+        <Text style={styles.label}>반복 횟수:</Text>
         <TextInput
           style={styles.input}
           keyboardType="numeric"
@@ -97,7 +100,7 @@ const CountField = ({ countData, onCountDataChange }) => {
           onChangeText={(text) =>
             onCountDataChange({
               ...countData,
-              repeatCount: parseInt(text) || 0, // 숫자 변환 및 기본값 0 설정
+              repeatCount: parseInt(text) || 0,
             })
           }
         />
