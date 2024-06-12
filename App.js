@@ -6,6 +6,8 @@ import LoginScreen from "./screens/LoginScreen";
 import MainToDoScreen from "./screens/MainToDoScreen";
 import ExampleScreen from "./screens/exampleScreen";
 import RegisterScreen from "./screens/RegisterScreen";
+import ForgotIdScreen from "./screens/ForgotIdScreen";
+import ForgotPwScreen from "./screens/ForgotPwScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +36,16 @@ export default function App() {
         <Stack.Screen
           name="MainToDo"
           component={MainToDoScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ForgotId"
+          component={ForgotIdScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ForgotPw"
+          component={ForgotPwScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

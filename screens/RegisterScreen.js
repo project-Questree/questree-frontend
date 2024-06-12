@@ -252,9 +252,9 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold", // 굵게 표시
+    fontWeight: "bold",
     marginBottom: 5,
-    alignSelf: "flex-start", // 텍스트 왼쪽 정렬
+    alignSelf: "flex-start",
   },
 });
 

@@ -1,7 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, Button, TextInput } from "react-native";
-import MainToDoScreen from "./MainToDoScreen";
-import RegisterScreen from "./RegisterScreen";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TextInput,
+  TouchableOpacity,
+} from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -82,7 +87,14 @@ function LoginScreen({ navigation }) {
           onPress={() => navigation.navigate("Register")}
           color="gray"
         />
-        <Text style={styles.forgotPassword}>비밀번호를 잊으셨나요?</Text>
+        <View style={styles.forgotIdPasswordContainer}>
+          <TouchableOpacity onPress={() => navigation.navigate("ForgotId")}>
+            <Text style={styles.forgotIdPassword}>아이디 / </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate("ForgotPw")}>
+            <Text style={styles.forgotIdPassword}>비밀번호를 잊으셨나요?</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -128,7 +140,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 10,
   },
-  forgotPassword: {
+  forgotIdPasswordContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  forgotIdPassword: {
     color: "gray",
     textDecorationLine: "underline",
     marginTop: 20,
