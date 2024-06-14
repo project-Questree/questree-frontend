@@ -46,9 +46,35 @@ function MainToDoScreen() {
   const [isLoading, setIsLoading] = useState(true); // isLoading 상태 추가
   const [error, setError] = useState(null); // error 상태 추가
 
+  const [editingTodoId, setEditingTodoId] = useState(null); // 수정 중인 TODO ID 상태
+  const [editedTodoContent, setEditedTodoContent] = useState(""); // 수정된 TODO 내용 상태
+
+  const handleTodoPress = (item) => {
+    setEditingTodoId(item.id); // 수정 중인 TODO ID 설정
+    setEditedTodoContent(item.content); // 수정된 TODO 내용 초기값 설정
+  };
+
   useEffect(() => {
     fetchTodos();
   }, [currentDate]);
+
+  const handlePreviousDay = () => {
+    const previousDay = new Date(currentDate);
+    previousDay.setDate(currentDate.getDate() - 1);
+    setCurrentDate(previousDay);
+  };
+
+  const handleNextDay = () => {
+    const nextDay = new Date(currentDate);
+    nextDay.setDate(currentDate.getDate() + 1);
+    setCurrentDate(nextDay);
+  };
+
+  const formatDate = (date) => {
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}/${day}`;
+  };
 
   const fetchTodos = async () => {
     try {
@@ -73,24 +99,14 @@ function MainToDoScreen() {
       }
 
       const data = await response.json();
+      console.log("GET 성공 :", data);
+      setTodoLists(data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching todo lists:", error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handlePreviousDay = () => {
-    const previousDay = new Date(currentDate);
-    previousDay.setDate(currentDate.getDate() - 1);
-    setCurrentDate(previousDay);
-  };
-
-  const handleNextDay = () => {
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(currentDate.getDate() + 1);
-    setCurrentDate(nextDay);
   };
 
   const addTodo = async () => {
@@ -173,11 +189,78 @@ function MainToDoScreen() {
     }
   };
 
-  const formatDate = (date) => {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${month}/${day}`;
+  const handleEditTodo = async (todoId) => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+      console.log(todoId);
+      console.log(editedTodoContent);
+      const response = await fetch(
+        `https://api.questree.lesh.kr/plans/update`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
+          body: JSON.stringify({
+            id: todoId,
+            content: editedTodoContent,
+          }),
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update todo");
+      }
+
+      // 수정 성공 시 todoLists 상태 업데이트
+      setTodoLists((prevTodoLists) =>
+        prevTodoLists.map((todo) =>
+          todo.id === todoId ? { ...todo, content: editedTodoContent } : todo,
+        ),
+      );
+      setEditingTodoId(null); // 수정 종료
+      setEditedTodoContent("");
+    } catch (error) {
+      console.error("Error updating todo:", error);
+      // TODO: 에러 처리 (예: 사용자에게 알림)
+    }
   };
+
+  const handleDeleteTodo = async (todoId) => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+      const response = await fetch(
+        `https://api.questree.lesh.kr/plans/delete/${todoId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete todo");
+      }
+
+      // 삭제 성공 시 todoLists 상태 업데이트
+      setTodoLists((prevTodoLists) =>
+        prevTodoLists.filter((todo) => todo.id !== todoId),
+      );
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+      // TODO: 에러 처리 (예: 사용자에게 알림)
+    }
+  };
+  useEffect(() => {
+    fetchTodos();
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.todoItem}>
@@ -222,7 +305,18 @@ function MainToDoScreen() {
             }
           }}
         />
-        <Text style={styles.todoContent}>{item.content}</Text>
+        {editingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
+          <TextInput
+            style={styles.todoContentInput}
+            value={editedTodoContent}
+            onChangeText={setEditedTodoContent}
+            onBlur={() => handleEditTodo(item.id)} // 포커스 잃으면 수정 완료
+          />
+        ) : (
+          <TouchableOpacity onPress={() => handleTodoPress(item)}>
+            <Text style={styles.todoContent}>{item.content}</Text>
+          </TouchableOpacity>
+        )}
       </View>
       <Text style={styles.todoType}>({item.type})</Text>
       <TouchableOpacity onPress={() => handleDeleteTodo(item.id)}>
@@ -230,38 +324,6 @@ function MainToDoScreen() {
       </TouchableOpacity>
     </View>
   );
-  const handleDeleteTodo = async (todoId) => {
-    try {
-      const accessToken = await AsyncStorage.getItem("accessToken");
-      const refreshToken = await AsyncStorage.getItem("refreshToken");
-
-      const response = await fetch(
-        `https://api.questree.lesh.kr/plans/delete/${todoId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: accessToken,
-            "X-Refresh-Token": refreshToken,
-          },
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete todo");
-      }
-
-      // 삭제 성공 시 todoLists 상태 업데이트
-      setTodoLists((prevTodoLists) =>
-        prevTodoLists.filter((todo) => todo.id !== todoId),
-      );
-    } catch (error) {
-      console.error("Error deleting todo:", error);
-      // TODO: 에러 처리 (예: 사용자에게 알림)
-    }
-  };
-  useEffect(() => {
-    fetchTodos();
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -412,7 +474,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ccc", // 경계선 색상
   },
   switchDateBtn: {
-    color: "gray",
+    color: "#684c38",
     fontSize: 30,
   },
   dateText: {
@@ -420,7 +482,7 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderColor: "darkgrey",
     fontSize: 20,
-    backgroundColor: "grey",
+    backgroundColor: "#8c6b52",
     color: "white",
     borderRadius: 35,
     width: 70,
@@ -447,7 +509,7 @@ const styles = StyleSheet.create({
   floatingPlusButton: {
     position: "absolute",
 
-    backgroundColor: "grey",
+    backgroundColor: "#8c6b52",
     bottom: 30,
     right: 30,
     width: 60,
@@ -537,6 +599,24 @@ const styles = StyleSheet.create({
     flexDirection: "row", // 가로 배치로 변경
     justifyContent: "space-around",
     marginBottom: 20,
+  },
+  typeButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderWidth: 2,
+    borderColor: "white",
+    borderRadius: 5,
+  },
+  typeButtonText: {
+    fontSize: 16,
+    color: "black", // 기본 텍스트 색상
+  },
+  selectedTypeButton: {
+    backgroundColor: "#008d62",
+  },
+  pressedTypeButton: {
+    // 버튼이 눌렸을 때 스타일
+    opacity: 0.7, // 투명도 조절
   },
   todoItem: {
     flexDirection: "row",
