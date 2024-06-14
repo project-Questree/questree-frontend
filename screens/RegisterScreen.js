@@ -211,10 +211,11 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   button: {
-    backgroundColor: "#8c6b52",
+    width: "90%",
+    backgroundColor: "#008d62",
     paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 5,
+    borderRadius: 30,
   },
   buttonText: {
     color: "white",
@@ -236,6 +237,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "white",
     marginRight: 10,
+    fontWeight: "bold",
   },
   headerTitle: {
     fontSize: 20,

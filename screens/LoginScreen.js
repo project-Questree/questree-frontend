@@ -81,11 +81,20 @@ function LoginScreen({ navigation }) {
           placeholder="비밀번호"
           secureTextEntry={true}
         />
-        <Button title="로그인" onPress={handleLogin} color="#8c6b52" />
+      </View>
+
+      <View style={styles.buttonContainer}>
         <Button
+          style={styles.button}
+          title="로그인"
+          onPress={handleLogin}
+          color="#008d62"
+        />
+        <Button
+          style={styles.button}
           title="회원가입"
           onPress={() => navigation.navigate("Register")}
-          color="gray"
+          color="#8c6b52"
         />
         <View style={styles.forgotIdPasswordContainer}>
           <TouchableOpacity onPress={() => navigation.navigate("ForgotId")}>
@@ -109,8 +118,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   textContainer: {
+    width: "100%",
     marginTop: 70,
-    flex: 1,
+    flex: 2,
     marginBottom: 20,
     alignItems: "center",
   },
@@ -118,7 +128,11 @@ const styles = StyleSheet.create({
     flex: 2,
     width: "100%",
   },
-
+  buttonContainer: {
+    flex: 1,
+    width: "100%",
+    borderRadius: 50,
+  },
   titleText: {
     fontSize: 50,
     fontWeight: "bold",
@@ -131,14 +145,13 @@ const styles = StyleSheet.create({
   },
 
   inputBox: {
-    width: "100%",
     height: 40,
     borderWidth: 1,
     borderColor: "gray",
     borderRadius: 5,
     paddingLeft: 10,
     backgroundColor: "#fff",
-    marginBottom: 10,
+    marginBottom: 20,
   },
   forgotIdPasswordContainer: {
     flexDirection: "row",

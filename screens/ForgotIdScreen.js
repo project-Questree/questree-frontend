@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     fontSize: 24,
+    fontWeight: "bold",
     color: "white",
     marginRight: 10,
   },
@@ -140,6 +141,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   inputContainer: {
+    width: "100%",
     marginBottom: 10,
   },
   input: {
@@ -162,11 +164,12 @@ const styles = StyleSheet.create({
     height: 16,
   },
   button: {
-    backgroundColor: "#8c6b52", // 기존 버튼 배경색 유지
+    backgroundColor: "#008d62", // 나뭇잎색
     paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 5,
+    borderRadius: 10,
     marginTop: 20, // 결과 메시지와 버튼 사이 간격
+    width: "100%",
   },
   buttonText: {
     color: "white",

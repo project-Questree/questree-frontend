@@ -16,7 +16,6 @@ import {
   FlatList,
 } from "react-native";
 
-import { Picker } from "@react-native-picker/picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TodoList from "../Controllers/ToDoList";
 import WeeklyField from "../components/WeeklyField";
@@ -49,27 +48,31 @@ function MainToDoScreen() {
 
   useEffect(() => {
     fetchTodos();
-  }, []);
+  }, [currentDate]);
 
   const fetchTodos = async () => {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
 
-      const response = await fetch("https://api.questree.lesh.kr/plans", {
-        method: "GET",
-        headers: {
-          Authorization: accessToken,
-          "X-Refresh-Token": refreshToken,
+      const formattedDate = currentDate.toISOString(); // 현재 날짜를 ISO 8601 형식으로 변환
+
+      const response = await fetch(
+        `https://api.questree.lesh.kr/plans?requestDate=${formattedDate}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch todo lists");
       }
 
       const data = await response.json();
-      setTodoLists(data);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching todo lists:", error);
