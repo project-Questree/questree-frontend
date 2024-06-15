@@ -17,11 +17,11 @@ import {
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 import TodoList from "../Controllers/ToDoList";
 import WeeklyField from "../components/WeeklyField";
 import CountField from "../components/CountField";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
-
+import NavBar from "../components/NavBar";
 function MainToDoScreen() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [newTodo, setNewTodo] = useState("");
@@ -57,18 +57,6 @@ function MainToDoScreen() {
   useEffect(() => {
     fetchTodos();
   }, [currentDate]);
-
-  const handlePreviousDay = () => {
-    const previousDay = new Date(currentDate);
-    previousDay.setDate(currentDate.getDate() - 1);
-    setCurrentDate(previousDay);
-  };
-
-  const handleNextDay = () => {
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(currentDate.getDate() + 1);
-    setCurrentDate(nextDay);
-  };
 
   const formatDate = (date) => {
     const month = date.getMonth() + 1;
@@ -327,15 +315,7 @@ function MainToDoScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.navBar}>
-        <TouchableOpacity onPress={handlePreviousDay}>
-          <Text style={styles.switchDateBtn}>{"◀"}</Text>
-        </TouchableOpacity>
-        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
-        <TouchableOpacity onPress={handleNextDay}>
-          <Text style={styles.switchDateBtn}>{"▶"}</Text>
-        </TouchableOpacity>
-      </View>
+      <NavBar currentDate={currentDate} setCurrentDate={setCurrentDate} />
 
       <View style={styles.BodyContainer}>
         {isLoading ? (
@@ -462,34 +442,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-  },
-  navBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30,
-    borderBottomWidth: 1.5, // 경계선 두께
-    borderBottomColor: "#ccc", // 경계선 색상
-  },
-  switchDateBtn: {
-    color: "#684c38",
-    fontSize: 30,
-  },
-  dateText: {
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "darkgrey",
-    fontSize: 20,
-    backgroundColor: "#8c6b52",
-    color: "white",
-    borderRadius: 35,
-    width: 70,
-    height: 70,
-    textAlign: "center",
-    lineHeight: 70, // Ensures the text is centered vertically
-    overflow: "hidden",
   },
   BodyContainer: {
     flex: 1,
