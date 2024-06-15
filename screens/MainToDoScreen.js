@@ -58,12 +58,6 @@ function MainToDoScreen() {
     fetchTodos();
   }, [currentDate]);
 
-  const formatDate = (date) => {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${month}/${day}`;
-  };
-
   const fetchTodos = async () => {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
