@@ -19,11 +19,11 @@ import {
 
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BottomTabs from "../components/BottomTabs";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import WeeklyField from "../components/WeeklyField";
 import CountField from "../components/CountField";
 import NavBar from "../components/NavBar";
+import BottomTabBar from "../components/BottomTabBar";
 import { Ionicons } from "@expo/vector-icons";
 
 function MainToDoScreen() {
@@ -434,18 +434,8 @@ function MainToDoScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
-      {/* BottomTabs 컴포넌트 추가 */}
-      <View style={styles.bottomTabsContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate("MainToDo")}>
-          <Ionicons name="list-outline" size={32} color="#8c6b52" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Calendar")}>
-          <Ionicons name="calendar-outline" size={32} color="gray" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("MyPage")}>
-          <Ionicons name="person-outline" size={32} color="gray" />
-        </TouchableOpacity>
-      </View>
+
+      <BottomTabBar />
     </SafeAreaView>
   );
 }
@@ -601,14 +591,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 10,
     color: "red",
-  },
-  bottomTabsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
   },
 });
 

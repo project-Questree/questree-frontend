@@ -1,10 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import BottomTabBar from "../components/BottomTabBar"; // BottomTabBar 컴포넌트 import
 
 function MyPageScreen() {
   return (
     <View style={styles.container}>
-      <Text>My Page Screen</Text>
+      <View>
+        <Text>MyPage Screen</Text>
+      </View>
+      <BottomTabBar />
     </View>
   );
 }
@@ -12,8 +16,6 @@ function MyPageScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
 
