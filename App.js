@@ -8,6 +8,8 @@ import ExampleScreen from "./screens/exampleScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 import ForgotIdScreen from "./screens/ForgotIdScreen";
 import ForgotPwScreen from "./screens/ForgotPwScreen";
+import CalendarScreen from "./screens/CalendarScreen";
+import MyPageScreen from "./screens/MyPageScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +53,16 @@ export default function App() {
         <Stack.Screen
           name="Example"
           component={ExampleScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Calendar"
+          component={CalendarScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="MyPage"
+          component={MyPageScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

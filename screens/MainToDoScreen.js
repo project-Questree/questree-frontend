@@ -14,15 +14,21 @@ import {
   KeyboardAvoidingView,
   Platform,
   FlatList,
+  Alert,
 } from "react-native";
 
+import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import BottomTabs from "../components/BottomTabs";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
-import TodoList from "../Controllers/ToDoList";
 import WeeklyField from "../components/WeeklyField";
 import CountField from "../components/CountField";
 import NavBar from "../components/NavBar";
+import { Ionicons } from "@expo/vector-icons";
+
 function MainToDoScreen() {
+  const navigation = useNavigation();
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [newTodo, setNewTodo] = useState("");
   const [todoLists, setTodoLists] = useState([]);
@@ -46,12 +52,12 @@ function MainToDoScreen() {
   const [isLoading, setIsLoading] = useState(true); // isLoading 상태 추가
   const [error, setError] = useState(null); // error 상태 추가
 
-  const [editingTodoId, setEditingTodoId] = useState(null); // 수정 중인 TODO ID 상태
-  const [editedTodoContent, setEditedTodoContent] = useState(""); // 수정된 TODO 내용 상태
+  const [updatingTodoId, setUpdatingTodoId] = useState(null); // 수정 중인 TODO ID 상태
+  const [updatedTodoContent, setUpdatedTodoContent] = useState(""); // 수정된 TODO 내용 상태
 
   const handleTodoPress = (item) => {
-    setEditingTodoId(item.id); // 수정 중인 TODO ID 설정
-    setEditedTodoContent(item.content); // 수정된 TODO 내용 초기값 설정
+    setUpdatingTodoId(item.id); // 수정 중인 TODO ID 설정
+    setUpdatedTodoContent(item.content); // 수정된 TODO 내용 초기값 설정
   };
 
   useEffect(() => {
@@ -171,12 +177,12 @@ function MainToDoScreen() {
     }
   };
 
-  const handleEditTodo = async (todoId) => {
+  const e = async (todoId) => {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
       console.log(todoId);
-      console.log(editedTodoContent);
+      console.log(updatedTodoContent);
       const response = await fetch(
         `https://api.questree.lesh.kr/plans/update`,
         {
@@ -188,7 +194,7 @@ function MainToDoScreen() {
           },
           body: JSON.stringify({
             id: todoId,
-            content: editedTodoContent,
+            content: updatedTodoContent,
           }),
         },
       );
@@ -200,11 +206,11 @@ function MainToDoScreen() {
       // 수정 성공 시 todoLists 상태 업데이트
       setTodoLists((prevTodoLists) =>
         prevTodoLists.map((todo) =>
-          todo.id === todoId ? { ...todo, content: editedTodoContent } : todo,
+          todo.id === todoId ? { ...todo, content: updatedTodoContent } : todo,
         ),
       );
-      setEditingTodoId(null); // 수정 종료
-      setEditedTodoContent("");
+      setUpdatingTodoId(null); // 수정 종료
+      setUpdatedTodoContent("");
     } catch (error) {
       console.error("Error updating todo:", error);
       // TODO: 에러 처리 (예: 사용자에게 알림)
@@ -287,12 +293,12 @@ function MainToDoScreen() {
             }
           }}
         />
-        {editingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
+        {updatingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
           <TextInput
             style={styles.todoContentInput}
-            value={editedTodoContent}
-            onChangeText={setEditedTodoContent}
-            onBlur={() => handleEditTodo(item.id)} // 포커스 잃으면 수정 완료
+            value={updatedTodoContent}
+            onChangeText={setUpdatedTodoContent}
+            onBlur={() => e(item.id)} // 포커스 잃으면 수정 완료
           />
         ) : (
           <TouchableOpacity onPress={() => handleTodoPress(item)}>
@@ -428,6 +434,18 @@ function MainToDoScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </Modal>
+      {/* BottomTabs 컴포넌트 추가 */}
+      <View style={styles.bottomTabsContainer}>
+        <TouchableOpacity onPress={() => navigation.navigate("MainToDo")}>
+          <Ionicons name="list-outline" size={32} color="#8c6b52" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Calendar")}>
+          <Ionicons name="calendar-outline" size={32} color="gray" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("MyPage")}>
+          <Ionicons name="person-outline" size={32} color="gray" />
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -583,6 +601,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 10,
     color: "red",
+  },
+  bottomTabsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    padding: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
   },
 });
 
