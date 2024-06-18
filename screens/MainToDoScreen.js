@@ -364,11 +364,13 @@ function MainToDoScreen() {
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
 
-        <KeyboardAvoidingView
+        {/* <KeyboardAvoidingView
           style={styles.modalContainer}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <ScrollView style={styles.modalContent}>
+        > */}
+        <ScrollView contentContainerStyle={styles.modalScrollViewContent}>
+          {/* ScrollView contentContainerStyle 추가 */}
+          <View style={styles.modalContent}>
             <View>
               <Text style={styles.modalTitle}>To Do :</Text>
               <TextInput
@@ -425,14 +427,14 @@ function MainToDoScreen() {
                 onCountDataChange={setCountData}
               />
             )}
-
-            <View style={styles.addTodoButtonContainer}>
-              <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
-                <Text style={styles.buttonText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </View>
+        </ScrollView>
+        {/* </KeyboardAvoidingView> */}
+        <View style={styles.addTodoButtonContainer}>
+          <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
+            <Text style={styles.buttonText}>+</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
 
       <BottomTabBar />
@@ -464,7 +466,7 @@ const styles = StyleSheet.create({
     position: "absolute",
 
     backgroundColor: "#8c6b52",
-    bottom: 30,
+    bottom: 78,
     right: 30,
     width: 60,
     height: 60,
@@ -490,10 +492,19 @@ const styles = StyleSheet.create({
     bottom: 20, // 아래 여백
     right: 20, // 오른쪽 여백
   },
+  modalScrollViewContent: {
+    flexGrow: 1, // ScrollView 내용이 남는 공간을 모두 차지하도록 설정
+    justifyContent: "space-between", // 내용을 위아래로 정렬
+  },
+  addTodoButtonContainer: {
+    position: "absolute", // addTodoButton을 Modal 내부에 절대 위치로 배치
+    bottom: 20, // 하단 여백
+    right: 20, // 오른쪽 여백
+  },
   addTodoButton: {
     position: "absolute",
     bottom: 35,
-    right: 40,
+    right: 140,
     backgroundColor: "grey",
     width: 50,
     height: 50,
@@ -515,9 +526,9 @@ const styles = StyleSheet.create({
     fontSize: 30,
   },
   modalContainer: {
-    flex: 4,
+    flex: 1,
     justifyContent: "center",
-    // alignItems: "center",
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 17,
@@ -525,10 +536,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalContent: {
+    flex: 1,
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
     elevation: 5,
+    paddingBottom: 80,
   },
   AddTodoinput: {
     borderWidth: 1,
