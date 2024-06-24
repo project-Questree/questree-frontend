@@ -5,8 +5,10 @@ import BottomTabBar from "../components/BottomTabBar"; // BottomTabBar 컴포넌
 function CalendarScreen() {
   return (
     <View style={styles.container}>
-      <View>
-        <Text>Calendar Screen</Text>
+      <View style={styles.bodyContainer}>
+        <View>
+          <Text>Calendar Screen</Text>
+        </View>
       </View>
       <BottomTabBar />
     </View>
@@ -16,6 +18,9 @@ function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  bodyContainer: {
+    flex: 2,
   },
 });
 

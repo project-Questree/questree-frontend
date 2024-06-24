@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import BottomTabBar from "../components/BottomTabBar";
+import { Ionicons } from "@expo/vector-icons";
 
 function SettingScreen() {
   const navigation = useNavigation();
@@ -82,22 +82,27 @@ function SettingScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back-outline" size={24} color="black" />
+        </TouchableOpacity>
         <Text style={styles.title}>설정</Text>
       </View>
-      <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>알림 설정</Text>
-        <Switch
-          value={notificationsEnabled}
-          onValueChange={toggleNotifications}
-        />
-      </View>
-      <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>테마 설정</Text>
-        <TouchableOpacity onPress={toggleTheme}>
-          <Text style={styles.themeText}>
-            {theme === "light" ? "밝게" : "어둡게"}
-          </Text>
-        </TouchableOpacity>
+      <View style={styles.settingItemContainer}>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>알림 설정</Text>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={toggleNotifications}
+          />
+        </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>테마 설정</Text>
+          <TouchableOpacity onPress={toggleTheme}>
+            <Text style={styles.themeText}>
+              {theme === "light" ? "밝게" : "어둡게"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>로그아웃</Text>
@@ -109,14 +114,22 @@ function SettingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    marginLeft: 10,
+  },
+  settingItemContainer: {
+    flex: 2,
   },
   settingItem: {
     flexDirection: "row",
