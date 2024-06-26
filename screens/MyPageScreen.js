@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  SafeAreaView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import BottomTabBar from "../components/BottomTabBar";
@@ -16,10 +23,13 @@ function MyPageScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>마이페이지</Text>
-        <TouchableOpacity onPress={handleSettingsPress}>
+        <TouchableOpacity
+          style={styles.settingButton}
+          onPress={handleSettingsPress}
+        >
           <Ionicons name="settings-outline" size={28} color="black" />
         </TouchableOpacity>
       </View>
@@ -28,7 +38,7 @@ function MyPageScreen() {
       <View style={styles.profileContainer}>
         <Text>사진</Text>
         <Text style={styles.userName}>{userName}</Text>
-        {/* TODO: 간단한 소개 추가 (Text 컴포넌트 사용) */}
+        <Text style={styles.introduce}>자기소개자기소개자기소개</Text>
       </View>
 
       {/* 통계 영역 */}
@@ -47,7 +57,7 @@ function MyPageScreen() {
         </View>
       </View>
       <BottomTabBar />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -57,7 +67,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    felx: 0.2,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -67,6 +76,9 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 24,
     fontWeight: "bold",
+  },
+  settingButton: {
+    padding: 10,
   },
   profileContainer: {
     flex: 0.8,
@@ -83,6 +95,12 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  introduce: {
+    fontSize: 15,
+    fontweight: "bold",
   },
   statsContainer: {
     flex: 3,

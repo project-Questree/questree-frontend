@@ -252,11 +252,11 @@ function MainToDoScreen() {
 
   const renderItem = ({ item }) => (
     <View style={styles.todoItem}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View>
         <BouncyCheckbox
           style={styles.checkbox}
-          size={16}
-          fillColor="red"
+          size={20}
+          fillColor="#008d62"
           unfillColor="#FFFFFF"
           iconStyle={{ borderColor: "white" }}
           textStyle={{ fontFamily: "JosefinSans-Regular" }}
@@ -465,8 +465,8 @@ const styles = StyleSheet.create({
   floatingPlusButton: {
     position: "absolute",
 
-    backgroundColor: "#8c6b52",
-    bottom: 78,
+    backgroundColor: "#008d62",
+    bottom: 119,
     right: 30,
     width: 60,
     height: 60,
@@ -503,12 +503,12 @@ const styles = StyleSheet.create({
   },
   addTodoButton: {
     position: "absolute",
-    bottom: 35,
-    right: 140,
-    backgroundColor: "grey",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    bottom: 25,
+    right: 10,
+    backgroundColor: "#008d62",
+    width: 60,
+    height: 60,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -524,6 +524,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     color: "#fff",
     fontSize: 30,
+  },
+  checkbox: {
+    marginBottom: 10,
   },
   modalContainer: {
     flex: 1,
@@ -551,6 +554,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: 250,
     height: 40,
+  },
+  todoContentInput: {
+    flex: 1, // 남은 공간을 모두 차지하도록 설정
+    marginLeft: 10, // 체크박스와의 간격
+    fontSize: 16,
+    paddingVertical: 5, // 세로 패딩 추가 (선택 사항)
+    borderWidth: 1, // 밑줄 추가
+    padding: 10,
+    borderBottomColor: "#008d62", // 밑줄 색상
   },
   modalOverlay: {
     flex: 1,
@@ -595,15 +607,14 @@ const styles = StyleSheet.create({
   },
   todoContent: {
     fontSize: 16,
+    color: "black",
   },
   todoType: {
     fontSize: 12,
     color: "gray",
   },
   deleteButton: {
-    fontSize: 18,
-    marginLeft: 10,
-    color: "red",
+    fontSize: 15,
   },
 });
 

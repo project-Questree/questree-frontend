@@ -1,17 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import BottomTabBar from "../components/BottomTabBar"; // BottomTabBar 컴포넌트 import
 
 function CalendarScreen() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.bodyContainer}>
         <View>
           <Text>Calendar Screen</Text>
         </View>
       </View>
       <BottomTabBar />
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  SafeAreaView,
   Switch,
   Alert,
 } from "react-native";
@@ -80,7 +81,7 @@ function SettingScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back-outline" size={24} color="black" />
@@ -107,21 +108,24 @@ function SettingScreen() {
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>로그아웃</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
   },
   header: {
+    padding: 10,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
     paddingBottom: 10,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -130,29 +134,33 @@ const styles = StyleSheet.create({
   },
   settingItemContainer: {
     flex: 2,
+    padding: 10,
   },
   settingItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
   },
   settingLabel: {
     fontSize: 16,
   },
   themeText: {
     fontSize: 16,
-    color: "blue", // 테마 텍스트 색상 (예시)
+    color: "#008d62", // 테마 텍스트 색상 (예시)
   },
   logoutButton: {
-    backgroundColor: "red", // 로그아웃 버튼 색상 (예시)
+    backgroundColor: "#008d62", // 로그아웃 버튼 색상 (예시)
     padding: 10,
     borderRadius: 5,
     marginTop: 20,
   },
   logoutButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "bold",
     textAlign: "center",
   },

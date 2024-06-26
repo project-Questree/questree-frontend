@@ -84,18 +84,17 @@ function LoginScreen({ navigation }) {
       </View>
 
       <View style={styles.buttonContainer}>
-        <Button
-          style={styles.button}
-          title="로그인"
-          onPress={handleLogin}
-          color="#008d62"
-        />
-        <Button
-          style={styles.button}
-          title="회원가입"
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginButtonText}>로그인</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.registerButton}
           onPress={() => navigation.navigate("Register")}
-          color="#8c6b52"
-        />
+        >
+          <Text style={styles.registerButtonText}>회원가입</Text>
+        </TouchableOpacity>
+
         <View style={styles.forgotIdPasswordContainer}>
           <TouchableOpacity onPress={() => navigation.navigate("ForgotId")}>
             <Text style={styles.forgotIdPassword}>아이디 / </Text>
@@ -129,8 +128,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   buttonContainer: {
-    flex: 1,
-    width: "100%",
+    flex: 1.2,
+    width: "111%",
     borderRadius: 50,
   },
   titleText: {
@@ -162,6 +161,30 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     marginTop: 20,
     marginBottom: 10,
+    textAlign: "center",
+  },
+
+  loginButton: {
+    backgroundColor: "#008d62", // 로그아웃 버튼 색상 (예시)
+    padding: 12,
+    borderRadius: 5,
+    width: "100%",
+  },
+  registerButton: {
+    backgroundColor: "#8c6b52", // 로그아웃 버튼 색상 (예시)
+    padding: 12,
+    borderRadius: 5,
+  },
+  loginButtonText: {
+    color: "white",
+    fontSize: 17,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  registerButtonText: {
+    color: "white",
+    fontSize: 17,
+    fontWeight: "bold",
     textAlign: "center",
   },
 });
