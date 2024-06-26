@@ -97,8 +97,8 @@ const styles = StyleSheet.create({
   },
   selectedButton: {
     borderRadius: 5,
-    backgroundColor: "#007AFF", // 선택된 버튼 배경색 (예시)
-    borderColor: "#007AFF", // 선택된 버튼 테두리 색 (예시)
+    backgroundColor: "#008d62", // 선택된 버튼 배경색 (예시)
+    borderColor: "#008d62", // 선택된 버튼 테두리 색 (예시)
   },
 });
 

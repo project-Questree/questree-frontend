@@ -181,8 +181,8 @@ function RegisterScreen() {
         {confirmPasswordError && (
           <Text style={styles.errorText}>{confirmPasswordError}</Text>
         )}
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>회원가입</Text>
+        <TouchableOpacity style={styles.registerButton} onPress={handleSubmit}>
+          <Text style={styles.registerButtonText}>회원가입</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -210,16 +210,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 30,
   },
-  button: {
-    width: "90%",
-    backgroundColor: "#008d62",
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 30,
+  registerButton: {
+    backgroundColor: "#8c6b52", // 로그아웃 버튼 색상 (예시)
+    padding: 12,
+    borderRadius: 5,
+    width: "100%",
   },
-  buttonText: {
+  registerButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "bold",
     textAlign: "center",
   },

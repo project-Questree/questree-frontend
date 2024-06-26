@@ -14,15 +14,21 @@ import {
   KeyboardAvoidingView,
   Platform,
   FlatList,
+  Alert,
 } from "react-native";
 
+import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import TodoList from "../Controllers/ToDoList";
+import BouncyCheckbox from "react-native-bouncy-checkbox";
 import WeeklyField from "../components/WeeklyField";
 import CountField from "../components/CountField";
-import BouncyCheckbox from "react-native-bouncy-checkbox";
+import NavBar from "../components/NavBar";
+import BottomTabBar from "../components/BottomTabBar";
+import { Ionicons } from "@expo/vector-icons";
 
 function MainToDoScreen() {
+  const navigation = useNavigation();
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [newTodo, setNewTodo] = useState("");
   const [todoLists, setTodoLists] = useState([]);
@@ -46,35 +52,17 @@ function MainToDoScreen() {
   const [isLoading, setIsLoading] = useState(true); // isLoading 상태 추가
   const [error, setError] = useState(null); // error 상태 추가
 
-  const [editingTodoId, setEditingTodoId] = useState(null); // 수정 중인 TODO ID 상태
-  const [editedTodoContent, setEditedTodoContent] = useState(""); // 수정된 TODO 내용 상태
+  const [updatingTodoId, setUpdatingTodoId] = useState(null); // 수정 중인 TODO ID 상태
+  const [updatedTodoContent, setUpdatedTodoContent] = useState(""); // 수정된 TODO 내용 상태
 
   const handleTodoPress = (item) => {
-    setEditingTodoId(item.id); // 수정 중인 TODO ID 설정
-    setEditedTodoContent(item.content); // 수정된 TODO 내용 초기값 설정
+    setUpdatingTodoId(item.id); // 수정 중인 TODO ID 설정
+    setUpdatedTodoContent(item.content); // 수정된 TODO 내용 초기값 설정
   };
 
   useEffect(() => {
     fetchTodos();
   }, [currentDate]);
-
-  const handlePreviousDay = () => {
-    const previousDay = new Date(currentDate);
-    previousDay.setDate(currentDate.getDate() - 1);
-    setCurrentDate(previousDay);
-  };
-
-  const handleNextDay = () => {
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(currentDate.getDate() + 1);
-    setCurrentDate(nextDay);
-  };
-
-  const formatDate = (date) => {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${month}/${day}`;
-  };
 
   const fetchTodos = async () => {
     try {
@@ -189,12 +177,12 @@ function MainToDoScreen() {
     }
   };
 
-  const handleEditTodo = async (todoId) => {
+  const e = async (todoId) => {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
       console.log(todoId);
-      console.log(editedTodoContent);
+      console.log(updatedTodoContent);
       const response = await fetch(
         `https://api.questree.lesh.kr/plans/update`,
         {
@@ -206,7 +194,7 @@ function MainToDoScreen() {
           },
           body: JSON.stringify({
             id: todoId,
-            content: editedTodoContent,
+            content: updatedTodoContent,
           }),
         },
       );
@@ -218,11 +206,11 @@ function MainToDoScreen() {
       // 수정 성공 시 todoLists 상태 업데이트
       setTodoLists((prevTodoLists) =>
         prevTodoLists.map((todo) =>
-          todo.id === todoId ? { ...todo, content: editedTodoContent } : todo,
+          todo.id === todoId ? { ...todo, content: updatedTodoContent } : todo,
         ),
       );
-      setEditingTodoId(null); // 수정 종료
-      setEditedTodoContent("");
+      setUpdatingTodoId(null); // 수정 종료
+      setUpdatedTodoContent("");
     } catch (error) {
       console.error("Error updating todo:", error);
       // TODO: 에러 처리 (예: 사용자에게 알림)
@@ -264,11 +252,11 @@ function MainToDoScreen() {
 
   const renderItem = ({ item }) => (
     <View style={styles.todoItem}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View>
         <BouncyCheckbox
           style={styles.checkbox}
-          size={16}
-          fillColor="red"
+          size={20}
+          fillColor="#008d62"
           unfillColor="#FFFFFF"
           iconStyle={{ borderColor: "white" }}
           textStyle={{ fontFamily: "JosefinSans-Regular" }}
@@ -305,12 +293,12 @@ function MainToDoScreen() {
             }
           }}
         />
-        {editingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
+        {updatingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
           <TextInput
             style={styles.todoContentInput}
-            value={editedTodoContent}
-            onChangeText={setEditedTodoContent}
-            onBlur={() => handleEditTodo(item.id)} // 포커스 잃으면 수정 완료
+            value={updatedTodoContent}
+            onChangeText={setUpdatedTodoContent}
+            onBlur={() => e(item.id)} // 포커스 잃으면 수정 완료
           />
         ) : (
           <TouchableOpacity onPress={() => handleTodoPress(item)}>
@@ -327,15 +315,7 @@ function MainToDoScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.navBar}>
-        <TouchableOpacity onPress={handlePreviousDay}>
-          <Text style={styles.switchDateBtn}>{"◀"}</Text>
-        </TouchableOpacity>
-        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
-        <TouchableOpacity onPress={handleNextDay}>
-          <Text style={styles.switchDateBtn}>{"▶"}</Text>
-        </TouchableOpacity>
-      </View>
+      <NavBar currentDate={currentDate} setCurrentDate={setCurrentDate} />
 
       <View style={styles.BodyContainer}>
         {isLoading ? (
@@ -384,11 +364,13 @@ function MainToDoScreen() {
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
 
-        <KeyboardAvoidingView
+        {/* <KeyboardAvoidingView
           style={styles.modalContainer}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <ScrollView style={styles.modalContent}>
+        > */}
+        <ScrollView contentContainerStyle={styles.modalScrollViewContent}>
+          {/* ScrollView contentContainerStyle 추가 */}
+          <View style={styles.modalContent}>
             <View>
               <Text style={styles.modalTitle}>To Do :</Text>
               <TextInput
@@ -445,15 +427,17 @@ function MainToDoScreen() {
                 onCountDataChange={setCountData}
               />
             )}
-
-            <View style={styles.addTodoButtonContainer}>
-              <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
-                <Text style={styles.buttonText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </View>
+        </ScrollView>
+        {/* </KeyboardAvoidingView> */}
+        <View style={styles.addTodoButtonContainer}>
+          <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
+            <Text style={styles.buttonText}>+</Text>
+          </TouchableOpacity>
+        </View>
       </Modal>
+
+      <BottomTabBar />
     </SafeAreaView>
   );
 }
@@ -462,34 +446,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-  },
-  navBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30,
-    borderBottomWidth: 1.5, // 경계선 두께
-    borderBottomColor: "#ccc", // 경계선 색상
-  },
-  switchDateBtn: {
-    color: "#684c38",
-    fontSize: 30,
-  },
-  dateText: {
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "darkgrey",
-    fontSize: 20,
-    backgroundColor: "#8c6b52",
-    color: "white",
-    borderRadius: 35,
-    width: 70,
-    height: 70,
-    textAlign: "center",
-    lineHeight: 70, // Ensures the text is centered vertically
-    overflow: "hidden",
   },
   BodyContainer: {
     flex: 1,
@@ -509,8 +465,8 @@ const styles = StyleSheet.create({
   floatingPlusButton: {
     position: "absolute",
 
-    backgroundColor: "#8c6b52",
-    bottom: 30,
+    backgroundColor: "#008d62",
+    bottom: 119,
     right: 30,
     width: 60,
     height: 60,
@@ -536,14 +492,23 @@ const styles = StyleSheet.create({
     bottom: 20, // 아래 여백
     right: 20, // 오른쪽 여백
   },
+  modalScrollViewContent: {
+    flexGrow: 1, // ScrollView 내용이 남는 공간을 모두 차지하도록 설정
+    justifyContent: "space-between", // 내용을 위아래로 정렬
+  },
+  addTodoButtonContainer: {
+    position: "absolute", // addTodoButton을 Modal 내부에 절대 위치로 배치
+    bottom: 20, // 하단 여백
+    right: 20, // 오른쪽 여백
+  },
   addTodoButton: {
     position: "absolute",
-    bottom: 35,
-    right: 40,
-    backgroundColor: "grey",
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    bottom: 25,
+    right: 10,
+    backgroundColor: "#008d62",
+    width: 60,
+    height: 60,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -560,10 +525,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 30,
   },
+  checkbox: {
+    marginBottom: 10,
+  },
   modalContainer: {
-    flex: 4,
+    flex: 1,
     justifyContent: "center",
-    // alignItems: "center",
+    alignItems: "center",
   },
   modalTitle: {
     fontSize: 17,
@@ -571,10 +539,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   modalContent: {
+    flex: 1,
     backgroundColor: "#fff",
     padding: 20,
     borderRadius: 10,
     elevation: 5,
+    paddingBottom: 80,
   },
   AddTodoinput: {
     borderWidth: 1,
@@ -584,6 +554,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: 250,
     height: 40,
+  },
+  todoContentInput: {
+    flex: 1, // 남은 공간을 모두 차지하도록 설정
+    marginLeft: 10, // 체크박스와의 간격
+    fontSize: 16,
+    paddingVertical: 5, // 세로 패딩 추가 (선택 사항)
+    borderWidth: 1, // 밑줄 추가
+    padding: 10,
+    borderBottomColor: "#008d62", // 밑줄 색상
   },
   modalOverlay: {
     flex: 1,
@@ -628,15 +607,14 @@ const styles = StyleSheet.create({
   },
   todoContent: {
     fontSize: 16,
+    color: "black",
   },
   todoType: {
     fontSize: 12,
     color: "gray",
   },
   deleteButton: {
-    fontSize: 18,
-    marginLeft: 10,
-    color: "red",
+    fontSize: 15,
   },
 });
 
