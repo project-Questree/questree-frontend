@@ -47,7 +47,7 @@ function ForgotIdScreen() {
 
       if (response.ok) {
         const data = await response.json();
-        setResultMessage(`아이디: ${data.name}, 이메일: ${data.email}`);
+        setResultMessage(`아이디: ${data[0]}, 이메일: ${data[1]}`);
       } else {
         const errorData = await response.json();
         setResultMessage(
