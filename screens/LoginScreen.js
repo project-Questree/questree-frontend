@@ -71,7 +71,7 @@ function LoginScreen({ navigation }) {
           style={styles.inputBox}
           onChangeText={setNameOrEmail}
           value={nameOrEmail}
-          placeholder="아이디 또는 이메일"
+          placeholder="이메일"
         />
         <Text>Password</Text>
         <TextInput

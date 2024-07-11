@@ -128,10 +128,10 @@ function RegisterScreen() {
       </View>
 
       <View style={styles.container}>
-        <Text style={styles.label}>아이디</Text>
+        <Text style={styles.label}>이름</Text>
         <TextInput
           style={[styles.input, nameError && styles.invalidInput]}
-          placeholder="ID"
+          placeholder="이름"
           value={name}
           onChangeText={(text) => handleInputChange("name", text)}
           onBlur={() => handleBlur("name")}
