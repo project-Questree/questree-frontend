@@ -88,7 +88,14 @@ function MainToDoScreen() {
 
       const data = await response.json();
       console.log("GET 성공 :", data);
-      setTodoLists(data);
+
+      //API 응답에서 notOPeratedPlans 와 histories 배열을 합쳐 todoLists 에 저장
+      const TodoLists = [
+        ...(data.notOperatedPlans || []),
+        ...(data.histories || []),
+      ];
+
+      setTodoLists(TodoLists);
     } catch (error) {
       setError(error.message);
       console.error("Error fetching todo lists:", error);
