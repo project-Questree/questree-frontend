@@ -8,6 +8,10 @@ const NavBar = ({ currentDate, setCurrentDate }) => {
     return `${month}/${day}`;
   };
 
+  const handleDatePress = () => {
+    setCurrentDate(new Date());
+  };
+
   const handlePreviousDay = () => {
     const previousDay = new Date(currentDate);
     previousDay.setDate(currentDate.getDate() - 1);
@@ -25,7 +29,11 @@ const NavBar = ({ currentDate, setCurrentDate }) => {
       <TouchableOpacity onPress={handlePreviousDay}>
         <Text style={styles.switchDateBtn}>{"◀"}</Text>
       </TouchableOpacity>
-      <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
+
+      <TouchableOpacity onPress={handleDatePress}>
+        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity onPress={handleNextDay}>
         <Text style={styles.switchDateBtn}>{"▶"}</Text>
       </TouchableOpacity>
