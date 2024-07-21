@@ -1,14 +1,12 @@
 import React from "react";
 import { View, Text, StyleSheet, SafeAreaView } from "react-native";
-import BottomTabBar from "../components/BottomTabBar"; // BottomTabBar 컴포넌트 import
+import BottomTabBar from "../components/BottomTabBar";
 
 function CalendarScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.bodyContainer}>
-        <View>
-          <Text>Calendar Screen</Text>
-        </View>
+        <Text style={styles.preparingMessage}>준비 중입니다...😥</Text>
       </View>
       <BottomTabBar />
     </SafeAreaView>
@@ -20,7 +18,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bodyContainer: {
-    flex: 2,
+    flex: 1,
+    alignItems: "center", // 가운데 정렬
+    justifyContent: "center",
+  },
+  preparingMessage: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
 

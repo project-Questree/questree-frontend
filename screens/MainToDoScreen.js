@@ -259,64 +259,72 @@ function MainToDoScreen() {
 
   const renderItem = ({ item }) => (
     <View style={styles.todoItem}>
-      <View>
-        <BouncyCheckbox
-          style={styles.checkbox}
-          size={20}
-          fillColor="#008d62"
-          unfillColor="#FFFFFF"
-          iconStyle={{ borderColor: "white" }}
-          textStyle={{ fontFamily: "JosefinSans-Regular" }}
-          isChecked={!item.isContinue} // isContinue가 false일 때 체크되도록 변경
-          onPress={async (isChecked) => {
-            try {
-              const accessToken = await AsyncStorage.getItem("accessToken");
-              const refreshToken = await AsyncStorage.getItem("refreshToken");
+      <BouncyCheckbox
+        style={styles.checkbox}
+        size={20}
+        fillColor="#008d62"
+        unfillColor="#FFFFFF"
+        iconStyle={{ borderColor: "white" }}
+        textStyle={{ fontFamily: "JosefinSans-Regular" }}
+        isChecked={!item.isContinue} // isContinue가 false일 때 체크되도록 변경
+        onPress={async (isChecked) => {
+          try {
+            const accessToken = await AsyncStorage.getItem("accessToken");
+            const refreshToken = await AsyncStorage.getItem("refreshToken");
 
-              const response = await fetch(
-                `https://api.questree.lesh.kr/plans/checked/${item.id}`,
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: accessToken,
-                    "X-Refresh-Token": refreshToken,
-                  },
-                  // body: JSON.stringify({
-                  //   isContinue: !isChecked, // 반전된 값 전송
-                  // }),
+            const response = await fetch(
+              `https://api.questree.lesh.kr/plans/checked/${item.id}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: accessToken,
+                  "X-Refresh-Token": refreshToken,
                 },
-              );
+                // body: JSON.stringify({
+                //   isContinue: !isChecked, // 반전된 값 전송
+                // }),
+              },
+            );
 
-              if (!response.ok) {
-                throw new Error("Failed to update todo");
-              }
-
-              // API 요청 성공 후 할 일 목록 다시 가져오기
-              fetchTodos();
-            } catch (error) {
-              console.error("Error updating todo:", error);
-              // 에러 처리 (예: 사용자에게 알림)
+            if (!response.ok) {
+              throw new Error("Failed to update todo");
             }
-          }}
+
+            // API 요청 성공 후 할 일 목록 다시 가져오기
+            fetchTodos();
+          } catch (error) {
+            console.error("Error updating todo:", error);
+            // 에러 처리 (예: 사용자에게 알림)
+          }
+        }}
+      />
+      {updatingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
+        <TextInput
+          style={styles.todoContentInput}
+          value={updatedTodoContent}
+          onChangeText={setUpdatedTodoContent}
+          onBlur={() => e(item.id)} // 포커스 잃으면 수정 완료
         />
-        {updatingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
-          <TextInput
-            style={styles.todoContentInput}
-            value={updatedTodoContent}
-            onChangeText={setUpdatedTodoContent}
-            onBlur={() => e(item.id)} // 포커스 잃으면 수정 완료
-          />
-        ) : (
-          <TouchableOpacity onPress={() => handleTodoPress(item)}>
-            <Text style={styles.todoContent}>{item.content}</Text>
-          </TouchableOpacity>
-        )}
+      ) : (
+        <TouchableOpacity onPress={() => handleTodoPress(item)}>
+          <Text style={styles.todoContent}>{item.content}</Text>
+        </TouchableOpacity>
+      )}
+
+      <View
+        style={{
+          position: "absolute",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          right: 250,
+        }}
+      >
+        <Text style={styles.todoType}>({item.type})</Text>
+        <TouchableOpacity onPress={() => handleDeleteTodo(item.id)}>
+          <Text style={styles.deleteButton}>❌</Text>
+        </TouchableOpacity>
       </View>
-      <Text style={styles.todoType}>({item.type})</Text>
-      <TouchableOpacity onPress={() => handleDeleteTodo(item.id)}>
-        <Text style={styles.deleteButton}>❌</Text>
-      </TouchableOpacity>
     </View>
   );
 
@@ -456,10 +464,10 @@ const styles = StyleSheet.create({
   },
   BodyContainer: {
     flex: 1,
-    padding: 20,
+    padding: 10,
     backgroundColor: "#f5f5f5", // 연한 배경색
     borderRadius: 10, // 모서리를 둥글게
-    margin: 20, // 외부 여백
+    margin: 10, // 외부 여백
     shadowColor: "#000", // 그림자 색상
     shadowOffset: {
       width: 0,
@@ -532,9 +540,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 30,
   },
-  checkbox: {
-    marginBottom: 10,
-  },
+
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -579,7 +585,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     height: 0,
     width: "100%",
-    marginBottom: 0,
+    marginRight: 20,
   },
   typeButtonsContainer: {
     flexDirection: "row", // 가로 배치로 변경
@@ -613,7 +619,8 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ccc",
   },
   todoContent: {
-    fontSize: 16,
+    right: 300,
+    fontSize: 14,
     color: "black",
   },
   todoType: {
