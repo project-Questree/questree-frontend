@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   registerButton: {
-    backgroundColor: "#8c6b52", // 로그아웃 버튼 색상 (예시)
+    backgroundColor: "#008d62",
     padding: 12,
     borderRadius: 5,
     width: "100%",

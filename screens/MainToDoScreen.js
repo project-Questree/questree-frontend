@@ -121,11 +121,27 @@ function MainToDoScreen() {
       if (todoType === "WEEKLY") {
         newTodoItem.targetedDays = targetedDays;
         newTodoItem.resetDay = resetDay;
+        // WEEKLY 타입 유효성 검사
+        if (targetedDays === "0000000") {
+          Alert.alert("Error", "요일을 선택해주세요.");
+          return;
+        }
       } else if (todoType === "COUNT") {
         newTodoItem.startDate = countData.startDate?.toISOString().slice(0, 10);
         newTodoItem.endDate = countData.endDate?.toISOString().slice(0, 10);
         newTodoItem.intervals = countData.intervals;
         newTodoItem.repeatCount = countData.repeatCount;
+        // COUNT 타입 유효성 검사
+        if (!countData.startDate || !countData.endDate) {
+          Alert.alert("Error", "시작 날짜와 종료 날짜를 선택해주세요.");
+          return;
+        } else if (countData.intervals <= 0) {
+          Alert.alert("Error", "간격은 1 이상이어야 합니다.");
+          return;
+        } else if (countData.repeatCount > countData.intervals) {
+          Alert.alert("Error", "간격보다 반복 횟수가 많을 수 없습니다.");
+          return;
+        }
       }
 
       console.log("새로운 할 일 항목:", newTodoItem);
@@ -230,7 +246,7 @@ function MainToDoScreen() {
       const refreshToken = await AsyncStorage.getItem("refreshToken");
 
       const response = await fetch(
-        `https://api.questree.lesh.kr/plans/delete/${todoId}`,
+        `https://api.questree.lesh.kr/plans/deleteAll/${todoId}`,
         {
           method: "DELETE",
           headers: {
@@ -248,6 +264,7 @@ function MainToDoScreen() {
       setTodoLists((prevTodoLists) =>
         prevTodoLists.filter((todo) => todo.id !== todoId),
       );
+      console.log("삭제 성공하였습니다.");
     } catch (error) {
       console.error("Error deleting todo:", error);
       // TODO: 에러 처리 (예: 사용자에게 알림)

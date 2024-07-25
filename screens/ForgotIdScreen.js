@@ -9,6 +9,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function ForgotIdScreen() {
   const navigation = useNavigation();
@@ -50,17 +51,27 @@ function ForgotIdScreen() {
     setIsLoading(true); // 로딩 시작
 
     try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+
       const response = await fetch(
-        `https://api.questree.lesh.kr/member/findName?phone=${phone}`,
+        `https://api.questree.lesh.kr/member/findEmail?name=${name}&phone=${phone}`,
         {
           method: "GET",
+          headers: {
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
         },
       );
 
       if (response.ok) {
+        console.log(response);
         const data = await response.json();
         setResultMessage(`아이디: ${data[0]}, 이메일: ${data[1]}`);
       } else {
+        console.log(response);
+
         const errorData = await response.json();
         setResultMessage(
           errorData.message || "아이디/이메일 찾기에 실패했습니다.",

@@ -19,6 +19,7 @@ const CountField = ({ countData, onCountDataChange }) => {
   const [endDate, setEndDate] = useState(
     countData.endDate ? new Date(countData.endDate) : null,
   );
+  const [isCountValid, setIsCountValid] = useState(true); // 유효성 검사 상태 추가
 
   const formatDate = (date) => {
     return format(date, "yyyy년 MM월 dd일 (E)", { locale: ko });

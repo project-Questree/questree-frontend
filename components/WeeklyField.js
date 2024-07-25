@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    fontSize: 25,
+    fontSize: 20,
   },
   selectedButton: {
     borderRadius: 5,
