@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
   },
 
   treeImg: {
-    width: 400,
-    height: 400,
+    width: 300,
+    height: 300,
     marginBottom: 20,
   },
 });

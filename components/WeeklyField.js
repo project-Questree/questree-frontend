@@ -3,12 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
-const WeeklyField = ({
-  targetedDays,
-  resetDay,
-  onTargetedDaysChange,
-  onResetDayChange,
-}) => {
+const WeeklyField = ({ targetedDays, onTargetedDaysChange }) => {
   const [selectedDaysString, setSelectedDaysString] = useState(targetedDays);
 
   useEffect(() => {
@@ -47,24 +42,6 @@ const WeeklyField = ({
           </TouchableOpacity>
         ))}
       </View>
-
-      <Text style={styles.label}>Reset Day:</Text>
-      <View style={styles.buttonContainer}>
-        {daysOfWeek.map((day, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.button,
-              resetDay === index && styles.selectedButton, // resetDay 선택 스타일
-            ]}
-            onPress={() => onResetDayChange(index)}
-          >
-            <Text style={styles.buttonText}>{day}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* 추가된 부분: 현재 선택된 요일 문자열 표시 */}
     </View>
   );
 };
@@ -84,9 +61,7 @@ const styles = StyleSheet.create({
   targetedDayContainer: {
     marginBottom: 10,
   },
-  resetDayContainer: {
-    marginBottom: 10,
-  },
+
   picker: {
     height: 0,
     width: "100%",

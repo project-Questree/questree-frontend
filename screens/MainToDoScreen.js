@@ -1,5 +1,3 @@
-// MainToDoScreen.js
-
 import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
@@ -36,7 +34,6 @@ function MainToDoScreen() {
   const [todoType, setTodoType] = useState("TODO");
   const [selectedType, setSelectedType] = useState("TODO"); // 선택된 타입 상태
   const [targetedDays, setTargetedDays] = useState("0000000"); // targetedDays 상태 추가
-  const [resetDay, setResetDay] = useState(0); // 0: 일요일
   const [countData, setCountData] = useState({
     startDate: null,
     endDate: null,
@@ -89,10 +86,13 @@ function MainToDoScreen() {
       const data = await response.json();
       console.log("GET 성공 :", data);
 
-      //API 응답에서 notOPeratedPlans 와 histories 배열을 합쳐 todoLists 에 저장
+      // API 응답에서 notOperatedPlans 와 histories 배열을 합쳐 todoLists 에 저장
       const TodoLists = [
-        ...(data.notOperatedPlans || []),
-        ...(data.histories || []),
+        ...(data.notOperatedPlans || []).map((item) => ({
+          ...item,
+          isChecked: false,
+        })),
+        ...(data.histories || []).map((item) => ({ ...item, isChecked: true })),
       ];
 
       setTodoLists(TodoLists);
@@ -109,9 +109,7 @@ function MainToDoScreen() {
       let newTodoItem = {
         content: newTodo,
         type: todoType,
-        isContinue: true,
         targetedDays: null,
-        resetDay: null,
         startDate: null,
         endDate: null,
         intervals: null,
@@ -120,7 +118,6 @@ function MainToDoScreen() {
 
       if (todoType === "WEEKLY") {
         newTodoItem.targetedDays = targetedDays;
-        newTodoItem.resetDay = resetDay;
         // WEEKLY 타입 유효성 검사
         if (targetedDays === "0000000") {
           Alert.alert("Error", "요일을 선택해주세요.");
@@ -189,7 +186,6 @@ function MainToDoScreen() {
         setModalVisible(false);
         setFloatingPlusButtonVisible(true);
         setTargetedDays("0000000"); // targetedDays 초기화
-        setResetDay(0);
         setCountData({
           startDate: null,
           endDate: null,
@@ -240,24 +236,75 @@ function MainToDoScreen() {
     }
   };
 
-  const handleDeleteTodo = async (todoId) => {
+  const handleDeleteTodo = (todoId, isChecked) => {
+    let alertMessage = "";
+    let apiEndpoint = "";
+    let apiMethod = "DELETE";
+
+    if (isChecked) {
+      // Check된 histories일 경우
+      alertMessage = "히스토리가 삭제됩니다. 진행하시겠습니까?";
+      apiEndpoint = `https://api.questree.lesh.kr/plans/deleteOne/${todoId}`;
+    } else {
+      // notOperatedPlans일 경우
+      alertMessage = "해당 루틴이 삭제됩니다. 진행하시겠습니까?";
+      apiEndpoint = `https://api.questree.lesh.kr/plans/deleteAll/${todoId}`;
+    }
+    console.log(
+      "handleDeleteTodo called with todoId : ",
+      todoId,
+      "isChecked : ",
+      isChecked,
+      "apiEndpoint : ",
+      apiEndpoint,
+    ); // 로그 추가
+
+    Alert.alert(
+      "삭제 확인",
+      alertMessage,
+      [
+        {
+          text: "확인",
+          onPress: async () => {
+            console.log(
+              "확인 pressed, calling callDeleteApi with",
+              apiEndpoint,
+            ); // 로그 추가
+            await callDeleteApi(apiEndpoint, apiMethod, todoId);
+          },
+        },
+        { text: "취소", style: "cancel" },
+      ],
+      { cancelable: true },
+    );
+  };
+  const callDeleteApi = async (apiEndpoint, apiMethod, todoId) => {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
 
-      const response = await fetch(
-        `https://api.questree.lesh.kr/plans/deleteAll/${todoId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: accessToken,
-            "X-Refresh-Token": refreshToken,
-          },
+      const response = await fetch(apiEndpoint, {
+        method: apiMethod,
+        headers: {
+          Authorization: accessToken,
+          "X-Refresh-Token": refreshToken,
         },
-      );
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to delete todo");
+        console.log(`Error: ${response.status} ${response.statusText}`);
+        let errorMessage = "Failed to delete todo.";
+        if (response.status === 400) {
+          errorMessage =
+            "Bad Request (400): The server could not understand the request.";
+        } else if (response.status === 404) {
+          errorMessage =
+            "Not Found (404): The requested resource could not be found.";
+        } else if (response.status === 500) {
+          errorMessage =
+            "Internal Server Error (500): There was an error on the server.";
+        }
+        throw new Error(errorMessage);
       }
 
       // 삭제 성공 시 todoLists 상태 업데이트
@@ -267,12 +314,42 @@ function MainToDoScreen() {
       console.log("삭제 성공하였습니다.");
     } catch (error) {
       console.error("Error deleting todo:", error);
-      // TODO: 에러 처리 (예: 사용자에게 알림)
+      Alert.alert("Error", "Failed to delete todo.");
     }
   };
-  useEffect(() => {
-    fetchTodos();
-  }, []);
+
+  const handleCheckboxPress = async (item) => {
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+      const response = await fetch(
+        `https://api.questree.lesh.kr/plans/checked/${item.id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update todo");
+      }
+
+      // 상태 업데이트 시 배열의 순서를 유지
+      setTodoLists((prevTodoLists) =>
+        prevTodoLists.map((todo) =>
+          todo.id === item.id ? { ...todo, isChecked: !todo.isChecked } : todo,
+        ),
+      );
+    } catch (error) {
+      console.error("Error updating todo:", error);
+      // 에러 처리 (예: 사용자에게 알림)
+    }
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.todoItem}>
@@ -283,62 +360,40 @@ function MainToDoScreen() {
         unfillColor="#FFFFFF"
         iconStyle={{ borderColor: "white" }}
         textStyle={{ fontFamily: "JosefinSans-Regular" }}
-        isChecked={!item.isContinue} // isContinue가 false일 때 체크되도록 변경
-        onPress={async (isChecked) => {
-          try {
-            const accessToken = await AsyncStorage.getItem("accessToken");
-            const refreshToken = await AsyncStorage.getItem("refreshToken");
-
-            const response = await fetch(
-              `https://api.questree.lesh.kr/plans/checked/${item.id}`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: accessToken,
-                  "X-Refresh-Token": refreshToken,
-                },
-                // body: JSON.stringify({
-                //   isContinue: !isChecked, // 반전된 값 전송
-                // }),
-              },
-            );
-
-            if (!response.ok) {
-              throw new Error("Failed to update todo");
-            }
-
-            // API 요청 성공 후 할 일 목록 다시 가져오기
-            fetchTodos();
-          } catch (error) {
-            console.error("Error updating todo:", error);
-            // 에러 처리 (예: 사용자에게 알림)
-          }
-        }}
+        isChecked={item.isChecked}
+        onPress={() => handleCheckboxPress(item)}
       />
-      {updatingTodoId === item.id ? ( // 수정 중인 TODO인 경우 TextInput 표시
-        <TextInput
-          style={styles.todoContentInput}
-          value={updatedTodoContent}
-          onChangeText={setUpdatedTodoContent}
-          onBlur={() => e(item.id)} // 포커스 잃으면 수정 완료
-        />
-      ) : (
-        <TouchableOpacity onPress={() => handleTodoPress(item)}>
-          <Text style={styles.todoContent}>{item.content}</Text>
-        </TouchableOpacity>
-      )}
-
-      <View
-        style={{
-          position: "absolute",
-          justifyContent: "flex-end",
-          alignItems: "center",
-          right: 250,
-        }}
-      >
+      <View style={styles.todoContentContainer}>
+        {updatingTodoId === item.id ? (
+          <TextInput
+            style={styles.todoContentInput}
+            value={updatedTodoContent}
+            onChangeText={setUpdatedTodoContent}
+            onBlur={() => e(item.id)}
+            multiline={true} // 여러 줄 입력 가능하도록 설정
+          />
+        ) : (
+          <TouchableOpacity onPress={() => handleTodoPress(item)}>
+            <Text
+              style={[
+                styles.todoContent,
+                item.isChecked && styles.todoContentChecked,
+              ]}
+            >
+              {item.content}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <View style={styles.todoActions}>
         <Text style={styles.todoType}>({item.type})</Text>
-        <TouchableOpacity onPress={() => handleDeleteTodo(item.id)}>
+        <TouchableOpacity
+          style={styles.deleteButtonContainer}
+          onPress={() => {
+            console.log("Delete button pressed");
+            handleDeleteTodo(item.id, item.isChecked);
+          }}
+        >
           <Text style={styles.deleteButton}>❌</Text>
         </TouchableOpacity>
       </View>
@@ -396,12 +451,7 @@ function MainToDoScreen() {
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
 
-        {/* <KeyboardAvoidingView
-          style={styles.modalContainer}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        > */}
         <ScrollView contentContainerStyle={styles.modalScrollViewContent}>
-          {/* ScrollView contentContainerStyle 추가 */}
           <View style={styles.modalContent}>
             <View>
               <Text style={styles.modalTitle}>To Do :</Text>
@@ -448,9 +498,7 @@ function MainToDoScreen() {
             {selectedType === "WEEKLY" && (
               <WeeklyField
                 targetedDays={targetedDays}
-                resetDay={resetDay}
                 onTargetedDaysChange={setTargetedDays}
-                onResetDayChange={setResetDay}
               />
             )}
             {selectedType === "COUNT" && (
@@ -461,7 +509,6 @@ function MainToDoScreen() {
             )}
           </View>
         </ScrollView>
-        {/* </KeyboardAvoidingView> */}
         <View style={styles.addTodoButtonContainer}>
           <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
             <Text style={styles.buttonText}>+</Text>
@@ -496,14 +543,12 @@ const styles = StyleSheet.create({
   },
   floatingPlusButton: {
     position: "absolute",
-
     backgroundColor: "#008d62",
     bottom: 119,
     right: 30,
     width: 60,
     height: 60,
     borderRadius: 30,
-    borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -557,7 +602,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 30,
   },
-
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -585,15 +629,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 40,
   },
-  todoContentInput: {
-    flex: 1, // 남은 공간을 모두 차지하도록 설정
-    marginLeft: 10, // 체크박스와의 간격
-    fontSize: 16,
-    paddingVertical: 5, // 세로 패딩 추가 (선택 사항)
-    borderWidth: 1, // 밑줄 추가
-    padding: 10,
-    borderBottomColor: "#008d62", // 밑줄 색상
-  },
+
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -629,23 +665,67 @@ const styles = StyleSheet.create({
   },
   todoItem: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between", // 양쪽 끝으로 정렬
-    padding: 10,
+    padding: 5,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
+  checkbox: {
+    marginRight: 5,
+  },
+  todoContentContainer: {
+    flex: 1,
+    marginRight: 10,
+    flexDirection: "row",
+    flexWrap: "wrap", // 텍스트를 여러 줄로 표시하기 위한 스타일
+  },
+  todoContentInput: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 5,
+    borderWidth: 1,
+    padding: 10,
+    borderBottomColor: "#008d62",
+  },
   todoContent: {
-    right: 300,
     fontSize: 14,
+    marginTop: 10,
     color: "black",
+    flexWrap: "wrap", // 텍스트를 여러 줄로 표시하기 위한 스타일
+    flex: 1,
+    width: "100%",
+  },
+  todoContentInput: {
+    flex: 1, // 남은 공간을 모두 차지하도록 설정
+    marginLeft: 10, // 체크박스와의 간격
+    fontSize: 16,
+    paddingVertical: 5, // 세로 패딩 추가 (선택 사항)
+    borderWidth: 1, // 밑줄 추가
+    padding: 10,
+    borderBottomColor: "#008d62", // 밑줄 색상
+    width: "100%",
+  },
+  todoActions: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
   todoType: {
     fontSize: 12,
     color: "gray",
+    marginRight: 10,
+  },
+  deleteButtonContainer: {
+    padding: 10, // 터치 영역을 키우기 위해 패딩 추가
   },
   deleteButton: {
     fontSize: 15,
+  },
+  todoContentChecked: {
+    fontSize: 14,
+    marginTop: 10,
+    color: "gray",
+    textDecorationLine: "line-through", // 체크된 항목에 회색 줄을 긋기 위한 스타일
   },
 });
 

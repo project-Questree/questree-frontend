@@ -9,29 +9,33 @@ import {
   SafeAreaView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-function ForgotIdScreen() {
+function ForgotPwScreen() {
   const navigation = useNavigation();
-  const [name, setName] = useState("");
-  const [nameError, setNameError] = useState("");
+  const [email, setEmail] = useState(""); // 이메일 상태 사용
+  const [emailError, setEmailError] = useState(""); // 이메일 에러 상태
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resultMessage, setResultMessage] = useState("");
 
   const handleInputChange = (field, value) => {
-    if (field === "name") {
-      setName(value);
-      setNameError(""); // 입력 시 에러 메시지 초기화
+    if (field === "email") {
+      setEmail(value);
+      setEmailError("");
     } else if (field === "phone") {
       setPhone(value);
-      setPhoneError(""); // 입력 시 에러 메시지 초기화
+      setPhoneError("");
     }
   };
 
   const handleBlur = (field) => {
-    if (field === "name") {
-      setNameError(name.trim() === "" ? "이름을 입력해주세요." : "");
+    if (field === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      setEmailError(
+        !emailRegex.test(email) ? "올바른 이메일 주소를 입력해주세요." : "",
+      );
     } else if (field === "phone") {
       const phoneRegex = /^\d{11}$/;
       setPhoneError(
@@ -41,36 +45,42 @@ function ForgotIdScreen() {
   };
 
   const handleSubmit = async () => {
-    if (nameError || phoneError) {
-      // 이름 또는 휴대폰 번호 유효성 검사 실패 시
+    if (emailError || phoneError) {
       Alert.alert("Error", "모든 정보를 올바르게 입력해주세요.");
       return;
     }
 
-    setIsLoading(true); // 로딩 시작
+    setIsLoading(true);
 
     try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+
       const response = await fetch(
-        `https://api.questree.lesh.kr/member/findName?phone=${phone}`,
+        `https://api.questree.lesh.kr/member/findPassword?email=${email}&phone=${phone}`, // 쿼리 파라미터 수정
         {
           method: "GET",
+          headers: {
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
         },
       );
 
       if (response.ok) {
-        const data = await response.json();
-        setResultMessage(`아이디: ${data[0]}, 이메일: ${data[1]}`);
-      } else {
-        const errorData = await response.json();
+        const data = await response.text();
         setResultMessage(
-          errorData.message || "아이디/이메일 찾기에 실패했습니다.",
+          "새로운 비밀번호가 발급되었습니다. 이메일을 확인해주세요.",
         );
+      } else {
+        const errorData = await response.text();
+        setResultMessage(errorData.message || "비밀번호 찾기에 실패했습니다.");
       }
     } catch (error) {
-      console.error("Error finding ID/email:", error);
-      setResultMessage("An error occurred while finding ID/email.");
+      console.error("Error finding password:", error);
+      setResultMessage("An error occurred while finding password.");
     } finally {
-      setIsLoading(false); // 로딩 종료
+      setIsLoading(false);
     }
   };
 
@@ -94,21 +104,21 @@ function ForgotIdScreen() {
 
       <View style={styles.container}>
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>아이디</Text>
+          <Text style={styles.label}>이메일</Text>
           <TextInput
-            style={[styles.input, nameError && styles.invalidInput]}
-            placeholder="아이디"
-            value={name}
-            onChangeText={(text) => handleInputChange("name", text)}
-            onBlur={() => handleBlur("name")}
+            style={[styles.input, emailError && styles.invalidInput]}
+            placeholder="이메일"
+            value={email}
+            onChangeText={(text) => handleInputChange("email", text)}
+            keyboardType="email-address"
+            onBlur={() => handleBlur("email")}
           />
           <Text
-            style={[styles.errorText, nameError && styles.errorTextVisible]}
+            style={[styles.errorText, emailError && styles.errorTextVisible]}
           >
-            {nameError}
+            {emailError}
           </Text>
         </View>
-
         <View style={styles.inputContainer}>
           <Text style={styles.label}>휴대폰 번호</Text>
           <TextInput
@@ -117,7 +127,7 @@ function ForgotIdScreen() {
             value={phone}
             onChangeText={(text) => handleInputChange("phone", text)}
             keyboardType="default"
-            onBlur={handleBlur}
+            onBlur={() => handleBlur("phone")}
           />
           <Text
             style={[styles.errorText, phoneError && styles.errorTextVisible]}
@@ -237,4 +247,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ForgotIdScreen;
+export default ForgotPwScreen;

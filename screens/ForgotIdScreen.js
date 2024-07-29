@@ -67,12 +67,13 @@ function ForgotIdScreen() {
 
       if (response.ok) {
         console.log(response);
-        const data = await response.json();
-        setResultMessage(`아이디: ${data[0]}, 이메일: ${data[1]}`);
+        const data = await response.text();
+        console.log(data);
+        setResultMessage(`이름: ${data[0]}, 이메일: ${data}`);
       } else {
         console.log(response);
 
-        const errorData = await response.json();
+        const errorData = await response.text();
         setResultMessage(
           errorData.message || "아이디/이메일 찾기에 실패했습니다.",
         );

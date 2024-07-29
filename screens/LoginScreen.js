@@ -66,7 +66,7 @@ function LoginScreen({ navigation }) {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text>ID</Text>
+        <Text>Email</Text>
         <TextInput
           style={styles.inputBox}
           onChangeText={setNameOrEmail}
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   registerButton: {
-    backgroundColor: "#8c6b52", // 로그아웃 버튼 색상 (예시)
+    backgroundColor: "#66baa0", // 로그아웃 버튼 색상 (예시)
     padding: 12,
     borderRadius: 5,
   },
