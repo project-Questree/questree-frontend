@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
+import Icon from "react-native-vector-icons/Ionicons";
 
 function SettingScreen() {
   const navigation = useNavigation();
@@ -84,7 +84,7 @@ function SettingScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={24} color="black" />
+          <Icon name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <Text style={styles.title}>설정</Text>
       </View>

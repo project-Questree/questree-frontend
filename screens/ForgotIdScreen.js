@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Icon from "react-native-vector-icons/Ionicons";
 import {
   View,
   Text,
@@ -93,7 +94,7 @@ function ForgotIdScreen() {
       <SafeAreaView style={styles.safeAreaContainer}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>{"<"}</Text>
+            <Icon name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { textAlign: "center" }]}>
@@ -167,12 +168,7 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#8c6b52", // 기존 헤더 배경색 유지
   },
-  backButton: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "white",
-    marginRight: 10,
-  },
+
   headerTitle: {
     fontSize: 20,
     color: "white",
