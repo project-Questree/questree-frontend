@@ -69,23 +69,23 @@ function ForgotIdScreen() {
       );
 
       if (response.ok) {
-        console.log(response);
         const data = await response.text();
-        console.log(data);
+        Alert.alert("아이디 찾기 성공", `이름: ${data[0]}, 이메일: ${data}`);
         setResultMessage(`이름: ${data[0]}, 이메일: ${data}`);
       } else {
-        console.log(response);
-
         const errorData = await response.text();
-        setResultMessage(
-          errorData.message || "아이디/이메일 찾기에 실패했습니다.",
+        Alert.alert(
+          "아이디 찾기 실패",
+          errorData.message || "올바른 정보를 입력해주세요.",
         );
+        setResultMessage(errorData.message || "올바른 정보를 입력해주세요.");
       }
     } catch (error) {
       console.error("Error finding ID/email:", error);
+      Alert.alert("Error", "An error occurred while finding ID/email.");
       setResultMessage("An error occurred while finding ID/email.");
     } finally {
-      setIsLoading(false); // 로딩 종료
+      setIsLoading(false);
     }
   };
 
@@ -148,11 +148,6 @@ function ForgotIdScreen() {
             <Text style={styles.buttonText}>아이디 찾기</Text>
           </TouchableOpacity>
         </View>
-        {isLoading ? (
-          <Text>Loading...</Text>
-        ) : (
-          <Text style={styles.resultMessage}>{resultMessage}</Text>
-        )}
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -170,7 +165,7 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     color: "white",
     fontWeight: "bold",
   },

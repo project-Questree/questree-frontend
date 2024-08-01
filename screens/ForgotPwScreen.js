@@ -72,15 +72,28 @@ function ForgotPwScreen() {
 
       if (response.ok) {
         const data = await response.text();
+        Alert.alert(
+          "비밀번호 찾기 성공",
+          "새로운 비밀번호가 발급되었습니다." +
+            String.fromCharCode(10) +
+            "이메일을 확인해주세요.",
+        );
         setResultMessage(
-          "새로운 비밀번호가 발급되었습니다. 이메일을 확인해주세요.",
+          "새로운 비밀번호가 발급되었습니다." +
+            String.fromCharCode(10) +
+            "이메일을 확인해주세요.",
         );
       } else {
         const errorData = await response.text();
-        setResultMessage(errorData.message || "비밀번호 찾기에 실패했습니다.");
+        Alert.alert(
+          "비밀번호 찾기 실패",
+          errorData.message || "올바른 정보를 입력해주세요.",
+        );
+        setResultMessage(errorData.message || "올바른 정보를 입력해주세요.");
       }
     } catch (error) {
       console.error("Error finding password:", error);
+      Alert.alert("Error", "An error occurred while finding password.");
       setResultMessage("An error occurred while finding password.");
     } finally {
       setIsLoading(false);
@@ -146,11 +159,6 @@ function ForgotPwScreen() {
             <Text style={styles.buttonText}>비밀번호 찾기</Text>
           </TouchableOpacity>
         </View>
-        {isLoading ? (
-          <Text>Loading...</Text>
-        ) : (
-          <Text style={styles.resultMessage}>{resultMessage}</Text>
-        )}
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -167,7 +175,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#8c6b52", // 기존 헤더 배경색 유지
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     color: "white",
     fontWeight: "bold",
   },
