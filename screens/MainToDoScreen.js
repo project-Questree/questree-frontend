@@ -390,11 +390,10 @@ function MainToDoScreen() {
         <TouchableOpacity
           style={styles.deleteButtonContainer}
           onPress={() => {
-            console.log("Delete button pressed");
             handleDeleteTodo(item.id, item.isChecked);
           }}
         >
-          <Text style={styles.deleteButton}>❌</Text>
+          <Ionicons name="trash-outline" style={styles.deleteButton} />
         </TouchableOpacity>
       </View>
     </View>
@@ -719,7 +718,7 @@ const styles = StyleSheet.create({
     padding: 10, // 터치 영역을 키우기 위해 패딩 추가
   },
   deleteButton: {
-    fontSize: 15,
+    fontSize: 18,
   },
   todoContentChecked: {
     fontSize: 14,
