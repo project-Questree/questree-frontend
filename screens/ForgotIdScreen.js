@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -87,69 +89,71 @@ function ForgotIdScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeAreaContainer}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>{"<"}</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            아이디 찾기
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.textContainer}>
-        <Text style={styles.titleText}>Questree</Text>
-        <Text style={styles.subText}>아이디 찾기</Text>
-      </View>
-
-      <View style={styles.container}>
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>이름</Text>
-          <TextInput
-            style={[styles.input, nameError && styles.invalidInput]}
-            placeholder="이름"
-            value={name}
-            onChangeText={(text) => handleInputChange("name", text)}
-            onBlur={() => handleBlur("name")}
-          />
-          <Text
-            style={[styles.errorText, nameError && styles.errorTextVisible]}
-          >
-            {nameError}
-          </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeAreaContainer}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Text style={styles.backButton}>{"<"}</Text>
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.headerTitle, { textAlign: "center" }]}>
+              아이디 찾기
+            </Text>
+          </View>
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>휴대폰 번호</Text>
-          <TextInput
-            style={[styles.input, phoneError && styles.invalidInput]}
-            placeholder="휴대폰 번호"
-            value={phone}
-            onChangeText={(text) => handleInputChange("phone", text)}
-            keyboardType="default"
-            onBlur={handleBlur}
-          />
-          <Text
-            style={[styles.errorText, phoneError && styles.errorTextVisible]}
-          >
-            {phoneError}
-          </Text>
+        <View style={styles.textContainer}>
+          <Text style={styles.titleText}>Questree</Text>
+          <Text style={styles.subText}>아이디 찾기</Text>
         </View>
-      </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>아이디 찾기</Text>
-        </TouchableOpacity>
-      </View>
-      {isLoading ? (
-        <Text>Loading...</Text>
-      ) : (
-        <Text style={styles.resultMessage}>{resultMessage}</Text>
-      )}
-    </SafeAreaView>
+        <View style={styles.container}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>이름</Text>
+            <TextInput
+              style={[styles.input, nameError && styles.invalidInput]}
+              placeholder="이름"
+              value={name}
+              onChangeText={(text) => handleInputChange("name", text)}
+              onBlur={() => handleBlur("name")}
+            />
+            <Text
+              style={[styles.errorText, nameError && styles.errorTextVisible]}
+            >
+              {nameError}
+            </Text>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>휴대폰 번호</Text>
+            <TextInput
+              style={[styles.input, phoneError && styles.invalidInput]}
+              placeholder="휴대폰 번호"
+              value={phone}
+              onChangeText={(text) => handleInputChange("phone", text)}
+              keyboardType="default"
+              onBlur={handleBlur}
+            />
+            <Text
+              style={[styles.errorText, phoneError && styles.errorTextVisible]}
+            >
+              {phoneError}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>아이디 찾기</Text>
+          </TouchableOpacity>
+        </View>
+        {isLoading ? (
+          <Text>Loading...</Text>
+        ) : (
+          <Text style={styles.resultMessage}>{resultMessage}</Text>
+        )}
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
