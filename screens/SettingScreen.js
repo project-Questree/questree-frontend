@@ -172,8 +172,8 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     backgroundColor: "#008d62", // 로그아웃 버튼 색상 (예시)
-    padding: 10,
-    borderRadius: 5,
+    padding: 15,
+    borderRadius: 10,
     marginTop: 20,
   },
   logoutButtonText: {

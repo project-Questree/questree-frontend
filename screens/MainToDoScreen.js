@@ -23,6 +23,7 @@ import CountField from "../components/CountField";
 import NavBar from "../components/NavBar";
 import BottomTabBar from "../components/BottomTabBar";
 import { Ionicons } from "@expo/vector-icons";
+import Icon from "react-native-vector-icons/Ionicons";
 
 function MainToDoScreen() {
   const navigation = useNavigation();
@@ -40,17 +41,57 @@ function MainToDoScreen() {
     intervals: 0,
     repeatCount: 0,
   });
+
   const [floatingPlusButtonVisible, setFloatingPlusButtonVisible] =
     useState(true);
+
   const handleTypePress = (type) => {
     setSelectedType(type); // 선택된 타입 변경 (UI에 사용)
     setTodoType(type); // todoType 변경 (API 요청에 사용)
+
+    // 선택된 타입에 대한 설명 설정
+    let description = "";
+    if (type === "TODO") {
+      description = "TODO : 특정 시점에 단 한 번 수행하는 할 일입니다.";
+    } else if (type === "WEEKLY") {
+      description = "WEEKLY : 매주 특정 요일에 반복되는 할 일입니다.";
+    } else if (type === "COUNT") {
+      description = "COUNT : 일정 기간 동안 여러 번 반복되는 할 일입니다.";
+    }
+    setSelectedTypeDescription(description);
   };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setFloatingPlusButtonVisible(true);
+    setStep(1); // 모달을 닫을 때 단계 초기화
+    setSelectedType(""); // 타입 선택 초기화
+  };
+
+  const handleConfirmType = () => {
+    Alert.alert(
+      "타입 선택 확인",
+      `선택한 타입은 "${selectedType}"입니다. 계속하시겠습니까?`,
+      [
+        {
+          text: "취소",
+          style: "cancel",
+        },
+        {
+          text: "확인",
+          onPress: () => setStep(2), // 두 번째 단계로 이동
+        },
+      ],
+    );
+  };
+
   const [isLoading, setIsLoading] = useState(true); // isLoading 상태 추가
   const [error, setError] = useState(null); // error 상태 추가
 
   const [updatingTodoId, setUpdatingTodoId] = useState(null); // 수정 중인 TODO ID 상태
   const [updatedTodoContent, setUpdatedTodoContent] = useState(""); // 수정된 TODO 내용 상태
+  const [step, setStep] = useState(1);
+  const [selectedTypeDescription, setSelectedTypeDescription] = useState(""); // 선택된 타입 설명 상태 추가
 
   const handleTodoPress = (item) => {
     setUpdatingTodoId(item.id); // 수정 중인 TODO ID 설정
@@ -185,6 +226,7 @@ function MainToDoScreen() {
         setSelectedType("TODO");
         setModalVisible(false);
         setFloatingPlusButtonVisible(true);
+        setStep(1); // 단계 초기화
         setTargetedDays("0000000"); // targetedDays 초기화
         setCountData({
           startDate: null,
@@ -436,83 +478,116 @@ function MainToDoScreen() {
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-          setFloatingPlusButtonVisible(true);
-        }}
+        onRequestClose={handleCloseModal}
       >
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setModalVisible(false);
-            setFloatingPlusButtonVisible(true);
-          }}
-        >
+        <TouchableWithoutFeedback onPress={handleCloseModal}>
           <View style={styles.modalOverlay} />
         </TouchableWithoutFeedback>
 
         <ScrollView contentContainerStyle={styles.modalScrollViewContent}>
           <View style={styles.modalContent}>
-            <View>
-              <Text style={styles.modalTitle}>To Do :</Text>
-              <TextInput
-                style={styles.AddTodoinput}
-                value={newTodo}
-                onChangeText={setNewTodo}
-                placeholder="Add a new todo"
-                autoFocus={true}
-              />
-            </View>
+            {step === 1 ? (
+              <View style={styles.typeButtonsContainer}>
+                <Text style={styles.typeHeader}>할 일 유형</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.typeButton,
+                    selectedType === "TODO" && styles.selectedTypeButton,
+                  ]}
+                  onPress={() => handleTypePress("TODO")}
+                >
+                  <Text style={styles.typeButtonText}>TODO - 일회성 할 일</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.typeButton,
+                    selectedType === "WEEKLY" && styles.selectedTypeButton,
+                  ]}
+                  onPress={() => handleTypePress("WEEKLY")}
+                >
+                  <Text style={styles.typeButtonText}>WEEKLY - 매주 할 일</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.typeButton,
+                    selectedType === "COUNT" && styles.selectedTypeButton,
+                  ]}
+                  onPress={() => handleTypePress("COUNT")}
+                >
+                  <Text style={styles.typeButtonText}>
+                    COUNT - 특정 기간 내 횟수 반복 할 일
+                  </Text>
+                </TouchableOpacity>
 
-            <View style={styles.typeButtonsContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  selectedType === "TODO" && styles.selectedTypeButton,
-                ]}
-                onPress={() => handleTypePress("TODO")}
-              >
-                <Text style={styles.typeButtonText}>TODO</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  selectedType === "WEEKLY" && styles.selectedTypeButton,
-                ]}
-                onPress={() => handleTypePress("WEEKLY")}
-              >
-                <Text style={styles.typeButtonText}>WEEKLY</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  selectedType === "COUNT" && styles.selectedTypeButton,
-                ]}
-                onPress={() => handleTypePress("COUNT")}
-              >
-                <Text style={styles.typeButtonText}>COUNT</Text>
-              </TouchableOpacity>
-            </View>
+                {selectedTypeDescription !== "" && (
+                  <View style={styles.typeDescriptionContainer}>
+                    <Text style={styles.typeDescriptionText}>
+                      {selectedTypeDescription}
+                    </Text>
+                    <View style={styles.confirmButtonsContainer}>
+                      <TouchableOpacity
+                        style={styles.confirmButton}
+                        onPress={handleConfirmType}
+                      >
+                        <Text style={styles.confirmButtonText}>확인</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.cancelButton}
+                        onPress={() => setSelectedTypeDescription("")}
+                      >
+                        <Text style={styles.cancelButtonText}>취소</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View>
+                <View style={styles.header}>
+                  <TouchableOpacity
+                    onPress={() => setStep(1)}
+                    style={styles.backButton}
+                  >
+                    <Ionicons name="arrow-back" size={24} color="black" />
+                  </TouchableOpacity>
+                  <Text style={styles.headerText}>해야 할 일을 적어주세요</Text>
+                </View>
+                <View>
+                  <TextInput
+                    style={styles.AddTodoinput}
+                    value={newTodo}
+                    onChangeText={setNewTodo}
+                    placeholder="What do you need to do?"
+                    autoFocus={true}
+                  />
+                </View>
 
-            {/* 조건부 렌더링 (TODO일 경우 아무것도 렌더링하지 않음) */}
-            {selectedType === "WEEKLY" && (
-              <WeeklyField
-                targetedDays={targetedDays}
-                onTargetedDaysChange={setTargetedDays}
-              />
-            )}
-            {selectedType === "COUNT" && (
-              <CountField
-                countData={countData}
-                onCountDataChange={setCountData}
-              />
+                {/* 조건부 렌더링 (TODO일 경우 아무것도 렌더링하지 않음) */}
+                {selectedType === "WEEKLY" && (
+                  <WeeklyField
+                    targetedDays={targetedDays}
+                    onTargetedDaysChange={setTargetedDays}
+                  />
+                )}
+                {selectedType === "COUNT" && (
+                  <CountField
+                    countData={countData}
+                    onCountDataChange={setCountData}
+                  />
+                )}
+
+                <View style={styles.addTodoButtonContainer}>
+                  <TouchableOpacity
+                    style={styles.addTodoButton}
+                    onPress={addTodo}
+                  >
+                    <Text style={styles.buttonText}>+</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
           </View>
         </ScrollView>
-        <View style={styles.addTodoButtonContainer}>
-          <TouchableOpacity style={styles.addTodoButton} onPress={addTodo}>
-            <Text style={styles.buttonText}>+</Text>
-          </TouchableOpacity>
-        </View>
       </Modal>
 
       <BottomTabBar />
@@ -607,17 +682,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: "bold",
     marginBottom: 10,
   },
   modalContent: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 20,
+    padding: 15,
     borderRadius: 10,
     elevation: 5,
-    paddingBottom: 80,
+    paddingBottom: 180,
   },
   AddTodoinput: {
     borderWidth: 1,
@@ -625,7 +700,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 20,
-    width: 250,
+    width: "100%",
     height: 40,
   },
 
@@ -640,23 +715,25 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   typeButtonsContainer: {
-    flexDirection: "row", // 가로 배치로 변경
+    flexDirection: "column",
     justifyContent: "space-around",
     marginBottom: 20,
   },
   typeButton: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderWidth: 2,
-    borderColor: "white",
-    borderRadius: 5,
+    paddingVertical: 15,
+    borderWidth: 1,
+    borderColor: "#66baa0",
+    borderRadius: 10,
+    marginBottom: 10, // 버튼 간 간격
   },
   typeButtonText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "black", // 기본 텍스트 색상
   },
   selectedTypeButton: {
-    backgroundColor: "#008d62",
+    backgroundColor: "#66baa0",
+    borderColor: "#66baa0", // 선택된 버튼의 경계선 색상 변경
   },
   pressedTypeButton: {
     // 버튼이 눌렸을 때 스타일
@@ -725,6 +802,51 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "gray",
     textDecorationLine: "line-through", // 체크된 항목에 회색 줄을 긋기 위한 스타일
+  },
+  typeHeader: {
+    fontSize: 18,
+    marginBottom: 15,
+    color: "white", // 원하는 색상으로 변경
+    textAlign: "center",
+    backgroundColor: "#008d62", // 배경색 추가
+    paddingVertical: 10,
+    borderRadius: 5,
+    borderRadius: 10, // 둥근 모서리
+    overflow: "hidden", // 텍스트가 둥근 모서리를 넘어가지 않도록
+  },
+  typeDescriptionContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
+  },
+  typeDescriptionText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  confirmButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 10,
+  },
+  confirmButton: {
+    backgroundColor: "#008d62",
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 3,
+  },
+  confirmButtonText: {
+    color: "white",
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+  },
+  cancelButtonText: {
+    color: "#333",
+    fontSize: 16,
   },
 });
 

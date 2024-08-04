@@ -221,11 +221,11 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     backgroundColor: "#008d62",
-    padding: 12,
+    padding: 18,
     borderRadius: 5,
     width: "100%",
 
-    marginTop: 30,
+    marginTop: 95,
   },
   registerButtonText: {
     color: "white",
@@ -240,13 +240,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#8c6b52",
+    backgroundColor: "#66baa0",
     justifyContent: "center",
   },
   backButton: {
     fontSize: 24,
     color: "white",
-    marginRight: 10,
     fontWeight: "bold",
   },
   headerTitle: {
