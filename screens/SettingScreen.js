@@ -75,8 +75,8 @@ function SettingScreen() {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
+                  Cookie: `refreshToken=${refreshToken}`,
                 },
-                body: JSON.stringify({ refreshToken: refreshToken }),
               },
             );
 
