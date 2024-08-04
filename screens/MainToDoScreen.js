@@ -9,8 +9,6 @@ import {
   TouchableWithoutFeedback,
   SafeAreaView,
   ScrollView,
-  KeyboardAvoidingView,
-  Platform,
   FlatList,
   Alert,
 } from "react-native";
@@ -23,7 +21,6 @@ import CountField from "../components/CountField";
 import NavBar from "../components/NavBar";
 import BottomTabBar from "../components/BottomTabBar";
 import { Ionicons } from "@expo/vector-icons";
-import Icon from "react-native-vector-icons/Ionicons";
 
 function MainToDoScreen() {
   const navigation = useNavigation();
@@ -64,8 +61,22 @@ function MainToDoScreen() {
   const handleCloseModal = () => {
     setModalVisible(false);
     setFloatingPlusButtonVisible(true);
-    setStep(1); // 모달을 닫을 때 단계 초기화
-    setSelectedType(""); // 타입 선택 초기화
+    resetModalState(); // 모달을 닫을 때 상태 초기화
+  };
+
+  const resetModalState = () => {
+    setNewTodo("");
+    setTodoType("TODO");
+    setSelectedType("TODO");
+    setTargetedDays("0000000");
+    setCountData({
+      startDate: null,
+      endDate: null,
+      intervals: 0,
+      repeatCount: 0,
+    });
+    setSelectedTypeDescription("");
+    setStep(1);
   };
 
   const handleConfirmType = () => {
@@ -545,14 +556,18 @@ function MainToDoScreen() {
               <View>
                 <View style={styles.header}>
                   <TouchableOpacity
-                    onPress={() => setStep(1)}
+                    onPress={() => {
+                      setStep(1);
+                      resetModalState(); // 뒤로 가기 버튼을 누를 때 상태 초기화
+                    }}
                     style={styles.backButton}
                   >
                     <Ionicons name="arrow-back" size={24} color="black" />
                   </TouchableOpacity>
-                  <Text style={styles.headerText}>해야 할 일을 적어주세요</Text>
+                  <Text style={styles.headerTypeText}>{selectedType}</Text>
                 </View>
                 <View>
+                  <Text style={styles.headerText}>해야 할 일을 적어주세요</Text>
                   <TextInput
                     style={styles.AddTodoinput}
                     value={newTodo}
@@ -564,26 +579,41 @@ function MainToDoScreen() {
 
                 {/* 조건부 렌더링 (TODO일 경우 아무것도 렌더링하지 않음) */}
                 {selectedType === "WEEKLY" && (
-                  <WeeklyField
-                    targetedDays={targetedDays}
-                    onTargetedDaysChange={setTargetedDays}
-                  />
+                  <>
+                    <WeeklyField
+                      targetedDays={targetedDays}
+                      onTargetedDaysChange={setTargetedDays}
+                    />
+                    <TouchableOpacity
+                      style={styles.addTodoButton}
+                      onPress={addTodo}
+                    >
+                      <Text style={styles.buttonText}>확인</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
                 {selectedType === "COUNT" && (
-                  <CountField
-                    countData={countData}
-                    onCountDataChange={setCountData}
-                  />
+                  <>
+                    <CountField
+                      countData={countData}
+                      onCountDataChange={setCountData}
+                    />
+                    <TouchableOpacity
+                      style={styles.addTodoButton}
+                      onPress={addTodo}
+                    >
+                      <Text style={styles.buttonText}>확인</Text>
+                    </TouchableOpacity>
+                  </>
                 )}
-
-                <View style={styles.addTodoButtonContainer}>
+                {selectedType === "TODO" && (
                   <TouchableOpacity
                     style={styles.addTodoButton}
                     onPress={addTodo}
                   >
-                    <Text style={styles.buttonText}>+</Text>
+                    <Text style={styles.buttonText}>확인</Text>
                   </TouchableOpacity>
-                </View>
+                )}
               </View>
             )}
           </View>
@@ -619,10 +649,10 @@ const styles = StyleSheet.create({
     position: "absolute",
     backgroundColor: "#008d62",
     bottom: 119,
-    right: 30,
+    right: 20,
     width: 60,
     height: 60,
-    borderRadius: 30,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -647,21 +677,16 @@ const styles = StyleSheet.create({
     flexGrow: 1, // ScrollView 내용이 남는 공간을 모두 차지하도록 설정
     justifyContent: "space-between", // 내용을 위아래로 정렬
   },
-  addTodoButtonContainer: {
-    position: "absolute", // addTodoButton을 Modal 내부에 절대 위치로 배치
-    bottom: 20, // 하단 여백
-    right: 20, // 오른쪽 여백
-  },
   addTodoButton: {
-    position: "absolute",
-    bottom: 25,
-    right: 10,
     backgroundColor: "#008d62",
     width: 60,
-    height: 60,
+    height: 40,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
+    alignSelf: "flex-end",
+    marginTop: 0, // 버튼과 위 요소 간의 간격
+    marginBottom: 20, // 버튼과 아래 요소 간의 간격
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -672,9 +697,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   buttonText: {
-    position: "absolute",
     color: "#fff",
-    fontSize: 30,
+    fontSize: 16,
   },
   modalContainer: {
     flex: 1,
@@ -802,6 +826,24 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: "gray",
     textDecorationLine: "line-through", // 체크된 항목에 회색 줄을 긋기 위한 스타일
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#66baa0",
+    borderRadius: 10,
+  },
+  backButton: {
+    marginRight: 10,
+  },
+  headerTypeText: {
+    fontSize: 14,
+    color: "black",
+    fontWeight: "bold",
+  },
+  headerText: {
+    marginTop: 10,
   },
   typeHeader: {
     fontSize: 18,

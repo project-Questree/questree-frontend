@@ -26,8 +26,8 @@ const WeeklyField = ({ targetedDays, onTargetedDaysChange }) => {
   }, [selectedDaysString]);
 
   return (
-    <View style={styles.WeeklyContainer}>
-      <Text style={styles.label}>Targeted Days:</Text>
+    <View style={styles.weeklyContainer}>
+      <Text style={styles.label}>반복 요일 선택:</Text>
       <View style={styles.buttonContainer}>
         {daysOfWeek.map((day, index) => (
           <TouchableOpacity
@@ -38,7 +38,14 @@ const WeeklyField = ({ targetedDays, onTargetedDaysChange }) => {
             ]}
             onPress={() => toggleTargetedDay(index)}
           >
-            <Text style={styles.buttonText}>{day}</Text>
+            <Text
+              style={[
+                styles.buttonText,
+                selectedDaysString[index] === "1" && styles.selectedButtonText,
+              ]}
+            >
+              {day}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -47,33 +54,38 @@ const WeeklyField = ({ targetedDays, onTargetedDaysChange }) => {
 };
 
 const styles = StyleSheet.create({
-  buttonContainer: {
-    flexDirection: "row",
+  weeklyContainer: {
     marginTop: 20,
     marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#333",
+  },
+  buttonContainer: {
+    flexDirection: "row",
     justifyContent: "space-around",
   },
-
-  WeeklyField: {
-    marginTop: 150,
-    marginBottom: 20,
-  },
-  targetedDayContainer: {
-    marginBottom: 10,
-  },
-
-  picker: {
-    height: 0,
-    width: "100%",
-  },
-
-  buttonText: {
-    fontSize: 20,
+  button: {
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f0f0f0",
+    width: 40,
+    alignItems: "center",
   },
   selectedButton: {
-    borderRadius: 5,
-    backgroundColor: "#008d62", // 선택된 버튼 배경색 (예시)
-    borderColor: "#008d62", // 선택된 버튼 테두리 색 (예시)
+    backgroundColor: "#008d62",
+    borderColor: "#008d62",
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  selectedButtonText: {
+    color: "#fff",
   },
 });
 

@@ -19,7 +19,6 @@ const CountField = ({ countData, onCountDataChange }) => {
   const [endDate, setEndDate] = useState(
     countData.endDate ? new Date(countData.endDate) : null,
   );
-  const [isCountValid, setIsCountValid] = useState(true); // 유효성 검사 상태 추가
 
   const formatDate = (date) => {
     return format(date, "yyyy년 MM월 dd일 (E)", { locale: ko });
@@ -42,7 +41,10 @@ const CountField = ({ countData, onCountDataChange }) => {
       {/* Start Date */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>시작 날짜:</Text>
-        <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => setShowStartDatePicker(true)}
+        >
           <Text style={styles.dateButtonText}>
             {startDate ? formatDate(startDate) : "날짜 선택"}
           </Text>
@@ -60,7 +62,10 @@ const CountField = ({ countData, onCountDataChange }) => {
       {/* End Date */}
       <View style={styles.fieldContainer}>
         <Text style={styles.label}>종료 날짜:</Text>
-        <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => setShowEndDatePicker(true)}
+        >
           <Text style={styles.dateButtonText}>
             {endDate ? formatDate(endDate) : "날짜 선택"}
           </Text>
@@ -88,6 +93,7 @@ const CountField = ({ countData, onCountDataChange }) => {
               intervals: parseInt(text) || 0,
             })
           }
+          placeholder="1 이상의 숫자 입력"
         />
       </View>
 
@@ -104,7 +110,15 @@ const CountField = ({ countData, onCountDataChange }) => {
               repeatCount: parseInt(text) || 0,
             })
           }
+          placeholder="숫자 입력"
         />
+      </View>
+
+      {/* 반복 정보 표시 */}
+      <View style={styles.repeatInfoContainer}>
+        <Text style={styles.repeatInfoText}>
+          {countData.intervals}일 동안 {countData.repeatCount}번 반복하기
+        </Text>
       </View>
     </View>
   );
@@ -114,34 +128,63 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 15,
     marginBottom: 20,
+    paddingHorizontal: 15,
+    backgroundColor: "#f9f9f9",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   fieldContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 15,
   },
   label: {
     flex: 1,
     fontSize: 16,
+    fontWeight: "bold",
   },
   dateButton: {
-    backgroundColor: "#f0f0f0",
+    flex: 2,
+    backgroundColor: "#e0f7fa",
     paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
   },
   dateButtonText: {
     fontSize: 16,
+    color: "#333",
   },
   input: {
-    flex: 1,
+    flex: 2,
     height: 40,
     marginLeft: 10,
     borderColor: "gray",
     borderWidth: 1,
+    borderRadius: 5,
     paddingHorizontal: 10,
+    backgroundColor: "#fff",
+  },
+  repeatInfoContainer: {
+    marginTop: 10,
+    backgroundColor: "#e0f7fa",
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#b2ebf2",
+    alignItems: "center",
+  },
+  repeatInfoText: {
+    fontSize: 16,
+    color: "#00796b",
   },
 });
 
