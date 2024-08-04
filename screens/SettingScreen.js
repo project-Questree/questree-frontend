@@ -67,13 +67,31 @@ function SettingScreen() {
         text: "확인",
         onPress: async () => {
           try {
-            // AsyncStorage에서 토큰 삭제
-            await AsyncStorage.removeItem("accessToken");
-            await AsyncStorage.removeItem("refreshToken");
-            // 로그인 화면으로 이동
-            navigation.navigate("Login");
+            const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+            const response = await fetch(
+              "https://api.questree.lesh.kr/logout",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ refreshToken: refreshToken }),
+              },
+            );
+
+            if (response.ok) {
+              // 성공적으로 로그아웃되면 토큰 삭제
+              await AsyncStorage.removeItem("accessToken");
+              await AsyncStorage.removeItem("refreshToken");
+              // 로그인 화면으로 이동
+              navigation.navigate("Login");
+            } else {
+              Alert.alert("Error", "로그아웃에 실패했습니다.");
+            }
           } catch (error) {
             console.error("Error logging out:", error);
+            Alert.alert("Error", "로그아웃 중 오류가 발생했습니다.");
           }
         },
       },
