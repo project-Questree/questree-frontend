@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
@@ -28,7 +28,16 @@ const BottomTabBar = () => {
           name="list-outline"
           size={32}
           color={activeTab === "MainToDo" ? "white" : "gray"}
+          style={styles.icon} // 아이콘 스타일 추가
         />
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === "MainToDo" && styles.activeTabText,
+          ]}
+        >
+          할일 목록
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -43,7 +52,16 @@ const BottomTabBar = () => {
           name="calendar-outline"
           size={32}
           color={activeTab === "Calendar" ? "white" : "gray"}
+          style={styles.icon} // 아이콘 스타일 추가
         />
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === "Calendar" && styles.activeTabText,
+          ]}
+        >
+          달력
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -57,7 +75,16 @@ const BottomTabBar = () => {
           name="person-outline"
           size={32}
           color={activeTab === "MyPage" ? "white" : "gray"}
+          style={styles.icon} // 아이콘 스타일 추가
         />
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === "MyPage" && styles.activeTabText,
+          ]}
+        >
+          마이페이지
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -68,7 +95,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-
     borderTopWidth: 1,
     borderTopColor: "#ccc",
   },
@@ -78,7 +104,17 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   activeTabButton: {
-    backgroundColor: "#8c6b52",
+    backgroundColor: "#66baa0",
+  },
+  icon: {
+    marginBottom: 1, // 아이콘 아래에 약간의 마진 추가
+  },
+  tabText: {
+    fontSize: 12,
+    color: "gray",
+  },
+  activeTabText: {
+    color: "white",
   },
 });
 

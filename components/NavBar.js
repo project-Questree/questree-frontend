@@ -53,15 +53,12 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ccc", // 경계선 색상
   },
   switchDateBtn: {
-    color: "#684c38", // 색상 변경
+    color: "#66baa0", // 색상 변경
     fontSize: 30,
   },
   dateText: {
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "darkgrey",
     fontSize: 20,
-    backgroundColor: "#8c6b52",
+    backgroundColor: "#66baa0",
     color: "white",
     borderRadius: 35,
     width: 70,

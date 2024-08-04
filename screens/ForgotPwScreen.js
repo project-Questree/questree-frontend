@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#8c6b52", // 기존 헤더 배경색 유지
+    backgroundColor: "#66baa0", // 기존 헤더 배경색 유지
   },
   headerTitle: {
     fontSize: 18,
