@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Icon from "react-native-vector-icons/Ionicons";
 import {
   View,
   Text,
@@ -7,103 +8,169 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function ForgotPwScreen() {
   const navigation = useNavigation();
+  const [email, setEmail] = useState(""); // 이메일 상태 사용
+  const [emailError, setEmailError] = useState(""); // 이메일 에러 상태
   const [phone, setPhone] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resultMessage, setResultMessage] = useState("");
 
-  const handleInputChange = (value) => {
-    setPhone(value);
-    setPhoneError(""); // 입력 시 에러 메시지 초기화
+  const handleInputChange = (field, value) => {
+    if (field === "email") {
+      setEmail(value);
+      setEmailError("");
+    } else if (field === "phone") {
+      setPhone(value);
+      setPhoneError("");
+    }
   };
 
-  const handleBlur = () => {
-    const phoneRegex = /^\d{11}$/;
-    if (!phoneRegex.test(phone)) {
-      setPhoneError("휴대폰 번호는 11자리 숫자여야 합니다.");
+  const handleBlur = (field) => {
+    if (field === "email") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      setEmailError(
+        !emailRegex.test(email) ? "올바른 이메일 주소를 입력해주세요." : "",
+      );
+    } else if (field === "phone") {
+      const phoneRegex = /^\d{11}$/;
+      setPhoneError(
+        !phoneRegex.test(phone) ? "휴대폰 번호는 11자리 숫자여야 합니다." : "",
+      );
     }
   };
 
   const handleSubmit = async () => {
-    if (phoneError) {
-      Alert.alert("Error", "올바른 휴대폰 번호를 입력해주세요.");
+    if (emailError || phoneError) {
+      Alert.alert("Error", "모든 정보를 올바르게 입력해주세요.");
       return;
     }
 
-    setIsLoading(true); // 로딩 시작
+    setIsLoading(true);
 
     try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
+
       const response = await fetch(
-        `https://api.questree.lesh.kr/member/findName?phone=${phone}`,
+        `https://api.questree.lesh.kr/member/findPassword?email=${email}&phone=${phone}`, // 쿼리 파라미터 수정
         {
           method: "GET",
+          headers: {
+            Authorization: accessToken,
+            "X-Refresh-Token": refreshToken,
+          },
         },
       );
 
       if (response.ok) {
-        const data = await response.json();
-        setResultMessage(`아이디: ${data.name}, 이메일: ${data.email}`);
-      } else {
-        const errorData = await response.json();
-        setResultMessage(
-          errorData.message || "아이디/이메일 찾기에 실패했습니다.",
+        const data = await response.text();
+        Alert.alert(
+          "비밀번호 찾기 성공",
+          "새로운 비밀번호가 발급되었습니다." +
+            String.fromCharCode(10) +
+            "이메일을 확인해주세요.",
         );
+        setResultMessage(
+          "새로운 비밀번호가 발급되었습니다." +
+            String.fromCharCode(10) +
+            "이메일을 확인해주세요.",
+        );
+        setEmail("");
+        setPhone("");
+        // 인풋창 초기화
+      } else {
+        const errorData = await response.text();
+        Alert.alert(
+          "비밀번호 찾기 실패",
+          errorData.message || "올바른 정보를 입력해주세요.",
+        );
+        setResultMessage(errorData.message || "올바른 정보를 입력해주세요.");
       }
     } catch (error) {
-      console.error("Error finding ID/email:", error);
-      setResultMessage("An error occurred while finding ID/email.");
+      console.error("Error finding password:", error);
+      Alert.alert("Error", "An error occurred while finding password.");
+      setResultMessage("An error occurred while finding password.");
     } finally {
-      setIsLoading(false); // 로딩 종료
+      setIsLoading(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.safeAreaContainer}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>{"<"}</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            아이디 찾기
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.container}>
-        <Text style={styles.label}>휴대폰 번호</Text>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[styles.input, phoneError && styles.invalidInput]}
-            placeholder="휴대폰 번호"
-            value={phone}
-            onChangeText={handleInputChange}
-            keyboardType="phone-pad"
-            onBlur={handleBlur}
-          />
-          <Text
-            style={[styles.errorText, phoneError && styles.errorTextVisible]}
-          >
-            {phoneError}
-          </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeAreaContainer}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.headerTitle, { textAlign: "center" }]}>
+              비밀번호 찾기
+            </Text>
+          </View>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>아이디 찾기</Text>
-        </TouchableOpacity>
+        <View style={styles.textContainer}>
+          <Text style={styles.titleText}>Questree</Text>
+          <Text style={styles.subText}>비밀번호 찾기</Text>
+        </View>
 
-        {isLoading ? (
-          <Text>Loading...</Text>
-        ) : (
-          <Text style={styles.resultMessage}>{resultMessage}</Text>
+        <View style={styles.container}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>이메일</Text>
+            <TextInput
+              style={[styles.input, emailError && styles.invalidInput]}
+              placeholder="이메일"
+              value={email}
+              onChangeText={(text) => handleInputChange("email", text)}
+              keyboardType="email-address"
+              onBlur={() => handleBlur("email")}
+            />
+            <Text
+              style={[styles.errorText, emailError && styles.errorTextVisible]}
+            >
+              {emailError}
+            </Text>
+          </View>
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>휴대폰 번호</Text>
+            <TextInput
+              style={[styles.input, phoneError && styles.invalidInput]}
+              placeholder="휴대폰 번호"
+              value={phone}
+              onChangeText={(text) => handleInputChange("phone", text)}
+              keyboardType="default"
+              onBlur={() => handleBlur("phone")}
+            />
+            <Text
+              style={[styles.errorText, phoneError && styles.errorTextVisible]}
+            >
+              {phoneError}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+            <Text style={styles.buttonText}>비밀번호 찾기</Text>
+          </TouchableOpacity>
+        </View>
+
+        {isLoading && (
+          <View style={styles.spinnerContainer}>
+            <ActivityIndicator size="large" color="#008d62" />
+          </View>
         )}
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -115,18 +182,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#8c6b52", // 기존 헤더 배경색 유지
-  },
-  backButton: {
-    fontSize: 24,
-    color: "white",
-    marginRight: 10,
-    fontWeight: "bold",
+    backgroundColor: "#66baa0", // 기존 헤더 배경색 유지
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     color: "white",
     fontWeight: "bold",
+  },
+  textContainer: {
+    width: "100%",
+    marginTop: 70,
+    flex: 2,
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  titleText: {
+    fontSize: 50,
+    fontWeight: "bold",
+    color: "#371c07",
+  },
+  subText: {
+    marginVertical: 25,
+    fontWeight: "bold",
+    fontSize: 20,
   },
   container: {
     flex: 1,
@@ -141,6 +219,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
   },
   inputContainer: {
+    width: "100%",
     marginBottom: 10,
   },
   input: {
@@ -162,12 +241,16 @@ const styles = StyleSheet.create({
   errorTextVisible: {
     height: 16,
   },
+  buttonContainer: {
+    alignItems: "center",
+  },
   button: {
-    backgroundColor: "#8c6b52", // 기존 버튼 배경색 유지
+    backgroundColor: "#008d62", // 나뭇잎색
     paddingVertical: 15,
     paddingHorizontal: 30,
-    borderRadius: 5,
-    marginTop: 20, // 결과 메시지와 버튼 사이 간격
+    borderRadius: 10,
+    marginTop: 130, // 결과 메시지와 버튼 사이 간격
+    width: "90%",
   },
   buttonText: {
     color: "white",
@@ -178,6 +261,15 @@ const styles = StyleSheet.create({
   resultMessage: {
     marginTop: 10,
     fontSize: 16,
+  },
+  spinnerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

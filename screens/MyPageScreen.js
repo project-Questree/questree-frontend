@@ -38,7 +38,7 @@ function MyPageScreen() {
       <View style={styles.profileContainer}>
         <Text>사진</Text>
         <Text style={styles.userName}>{userName}</Text>
-        <Text style={styles.introduce}>자기소개자기소개자기소개</Text>
+        <Text style={styles.introduce}>자기소개</Text>
       </View>
 
       {/* 통계 영역 */}

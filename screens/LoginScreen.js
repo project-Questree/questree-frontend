@@ -6,6 +6,8 @@ import {
   Button,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -50,6 +52,10 @@ function LoginScreen({ navigation }) {
         AsyncStorage.setItem("accessToken", accessToken);
         AsyncStorage.setItem("refreshToken", refreshToken);
 
+        // Email과 Password state를 공백으로 설정
+        setNameOrEmail("");
+        setPassword("");
+
         // 로그인 후 메인 화면으로 이동
         navigation.navigate("MainToDo");
       })
@@ -59,52 +65,56 @@ function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.textContainer}>
-        <Text style={styles.titleText}>Questree</Text>
-        <Text style={styles.subText}>로그인</Text>
-      </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.textContainer}>
+          <Text style={styles.titleText}>Questree</Text>
+          <Text style={styles.subText}>로그인</Text>
+        </View>
 
-      <View style={styles.inputContainer}>
-        <Text>ID</Text>
-        <TextInput
-          style={styles.inputBox}
-          onChangeText={setNameOrEmail}
-          value={nameOrEmail}
-          placeholder="아이디 또는 이메일"
-        />
-        <Text>Password</Text>
-        <TextInput
-          style={styles.inputBox}
-          onChangeText={setPassword}
-          value={password}
-          placeholder="비밀번호"
-          secureTextEntry={true}
-        />
-      </View>
+        <View style={styles.inputContainer}>
+          <Text>Email</Text>
+          <TextInput
+            style={styles.inputBox}
+            onChangeText={setNameOrEmail}
+            value={nameOrEmail}
+            placeholder="이메일"
+          />
+          <Text>Password</Text>
+          <TextInput
+            style={styles.inputBox}
+            onChangeText={setPassword}
+            value={password}
+            placeholder="비밀번호"
+            secureTextEntry={true}
+          />
+        </View>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}>로그인</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.registerButton}
-          onPress={() => navigation.navigate("Register")}
-        >
-          <Text style={styles.registerButtonText}>회원가입</Text>
-        </TouchableOpacity>
-
-        <View style={styles.forgotIdPasswordContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate("ForgotId")}>
-            <Text style={styles.forgotIdPassword}>아이디 / </Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>로그인</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate("ForgotPw")}>
-            <Text style={styles.forgotIdPassword}>비밀번호를 잊으셨나요?</Text>
+
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={styles.registerButtonText}>회원가입</Text>
           </TouchableOpacity>
+
+          <View style={styles.forgotIdPasswordContainer}>
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotId")}>
+              <Text style={styles.forgotIdPassword}>아이디 / </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("ForgotPw")}>
+              <Text style={styles.forgotIdPassword}>
+                비밀번호를 잊으셨나요?
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -165,13 +175,13 @@ const styles = StyleSheet.create({
   },
 
   loginButton: {
-    backgroundColor: "#008d62", // 로그아웃 버튼 색상 (예시)
+    backgroundColor: "#008d62",
     padding: 12,
     borderRadius: 5,
     width: "100%",
   },
   registerButton: {
-    backgroundColor: "#8c6b52", // 로그아웃 버튼 색상 (예시)
+    backgroundColor: "#66baa0", //에메랄드색
     padding: 12,
     borderRadius: 5,
   },

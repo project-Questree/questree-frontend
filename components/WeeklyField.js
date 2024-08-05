@@ -3,12 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
 const daysOfWeek = ["일", "월", "화", "수", "목", "금", "토"];
 
-const WeeklyField = ({
-  targetedDays,
-  resetDay,
-  onTargetedDaysChange,
-  onResetDayChange,
-}) => {
+const WeeklyField = ({ targetedDays, onTargetedDaysChange }) => {
   const [selectedDaysString, setSelectedDaysString] = useState(targetedDays);
 
   useEffect(() => {
@@ -31,8 +26,8 @@ const WeeklyField = ({
   }, [selectedDaysString]);
 
   return (
-    <View style={styles.WeeklyContainer}>
-      <Text style={styles.label}>Targeted Days:</Text>
+    <View style={styles.weeklyContainer}>
+      <Text style={styles.label}>반복 요일 선택:</Text>
       <View style={styles.buttonContainer}>
         {daysOfWeek.map((day, index) => (
           <TouchableOpacity
@@ -43,62 +38,54 @@ const WeeklyField = ({
             ]}
             onPress={() => toggleTargetedDay(index)}
           >
-            <Text style={styles.buttonText}>{day}</Text>
+            <Text
+              style={[
+                styles.buttonText,
+                selectedDaysString[index] === "1" && styles.selectedButtonText,
+              ]}
+            >
+              {day}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
-
-      <Text style={styles.label}>Reset Day:</Text>
-      <View style={styles.buttonContainer}>
-        {daysOfWeek.map((day, index) => (
-          <TouchableOpacity
-            key={index}
-            style={[
-              styles.button,
-              resetDay === index && styles.selectedButton, // resetDay 선택 스타일
-            ]}
-            onPress={() => onResetDayChange(index)}
-          >
-            <Text style={styles.buttonText}>{day}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* 추가된 부분: 현재 선택된 요일 문자열 표시 */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  buttonContainer: {
-    flexDirection: "row",
+  weeklyContainer: {
     marginTop: 20,
     marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#333",
+  },
+  buttonContainer: {
+    flexDirection: "row",
     justifyContent: "space-around",
   },
-
-  WeeklyField: {
-    marginTop: 150,
-    marginBottom: 20,
-  },
-  targetedDayContainer: {
-    marginBottom: 10,
-  },
-  resetDayContainer: {
-    marginBottom: 10,
-  },
-  picker: {
-    height: 0,
-    width: "100%",
-  },
-
-  buttonText: {
-    fontSize: 25,
+  button: {
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#f0f0f0",
+    width: 40,
+    alignItems: "center",
   },
   selectedButton: {
-    borderRadius: 5,
-    backgroundColor: "#008d62", // 선택된 버튼 배경색 (예시)
-    borderColor: "#008d62", // 선택된 버튼 테두리 색 (예시)
+    backgroundColor: "#008d62",
+    borderColor: "#008d62",
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  selectedButtonText: {
+    color: "#fff",
   },
 });
 

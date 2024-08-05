@@ -1,14 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
+import RNPickerSelect from "react-native-picker-select";
 
 const CountField = ({ countData, onCountDataChange }) => {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -36,12 +31,23 @@ const CountField = ({ countData, onCountDataChange }) => {
     onCountDataChange({ ...countData, endDate: date }); // Date 객체 전달
   };
 
+  const generatePickerItems = (max) => {
+    const items = [];
+    for (let i = 1; i <= max; i++) {
+      items.push({ label: `${i}`, value: i });
+    }
+    return items;
+  };
+
   return (
     <View style={styles.container}>
       {/* Start Date */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>시작 날짜:</Text>
-        <TouchableOpacity onPress={() => setShowStartDatePicker(true)}>
+        <Text style={styles.dateLabel}>시작 날짜</Text>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => setShowStartDatePicker(true)}
+        >
           <Text style={styles.dateButtonText}>
             {startDate ? formatDate(startDate) : "날짜 선택"}
           </Text>
@@ -58,8 +64,11 @@ const CountField = ({ countData, onCountDataChange }) => {
 
       {/* End Date */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>종료 날짜:</Text>
-        <TouchableOpacity onPress={() => setShowEndDatePicker(true)}>
+        <Text style={styles.dateLabel}>종료 날짜</Text>
+        <TouchableOpacity
+          style={styles.dateButton}
+          onPress={() => setShowEndDatePicker(true)}
+        >
           <Text style={styles.dateButtonText}>
             {endDate ? formatDate(endDate) : "날짜 선택"}
           </Text>
@@ -74,73 +83,130 @@ const CountField = ({ countData, onCountDataChange }) => {
         onCancel={() => setShowEndDatePicker(false)}
       />
 
-      {/* Intervals */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>간격 (일):</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={countData.intervals.toString()}
-          onChangeText={(text) =>
-            onCountDataChange({
-              ...countData,
-              intervals: parseInt(text) || 0,
-            })
-          }
-        />
-      </View>
-
-      {/* Repeat Count */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>반복 횟수:</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={countData.repeatCount.toString()}
-          onChangeText={(text) =>
-            onCountDataChange({
-              ...countData,
-              repeatCount: parseInt(text) || 0,
-            })
-          }
-        />
+      {/* Intervals and Repeat Count */}
+      <View style={styles.pickerContainer}>
+        <View style={styles.pickerWrapper}>
+          <RNPickerSelect
+            onValueChange={(value) =>
+              onCountDataChange({ ...countData, intervals: value })
+            }
+            items={generatePickerItems(30)}
+            placeholder={{ label: "-", value: null }}
+            style={pickerSelectStyles}
+          />
+          <Text style={styles.pickerLabel}>일 동안</Text>
+          <RNPickerSelect
+            onValueChange={(value) =>
+              onCountDataChange({ ...countData, repeatCount: value })
+            }
+            items={generatePickerItems(30)}
+            placeholder={{ label: "-", value: null }}
+            style={pickerSelectStyles}
+          />
+          <Text style={styles.pickerLabel}>번 반복하기</Text>
+        </View>
       </View>
     </View>
   );
 };
 
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: "#66baa0",
+    borderRadius: 5,
+    color: "white",
+    backgroundColor: "#66baa0",
+    textAlign: "center",
+    paddingRight: 15, // Ensures text is never behind the icon
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#66baa0",
+    borderRadius: 5,
+    color: "white",
+    backgroundColor: "#66baa0",
+    textAlign: "center",
+    paddingRight: 15, // Ensures text is never behind the icon
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  placeholder: {
+    color: "white",
+  },
+});
+
 const styles = StyleSheet.create({
   container: {
     marginTop: 15,
     marginBottom: 20,
+    paddingHorizontal: 15,
+    backgroundColor: "#f9f9f9",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   fieldContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 15,
   },
-  label: {
+  dateLabel: {
+    color: "#545454",
+    marginLeft: 8,
     flex: 1,
     fontSize: 16,
   },
   dateButton: {
-    backgroundColor: "#f0f0f0",
+    flex: 2,
+    backgroundColor: "#66baa0",
     paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingVertical: 10,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: "#ccc",
+    justifyContent: "center",
+    alignItems: "center",
   },
   dateButtonText: {
     fontSize: 16,
+    color: "white",
   },
-  input: {
-    flex: 1,
-    height: 40,
-    marginLeft: 10,
-    borderColor: "gray",
-    borderWidth: 1,
-    paddingHorizontal: 10,
+  pickerContainer: {
+    marginTop: 10,
+    backgroundColor: "#f9f9f9",
+    padding: 10,
+    alignItems: "center",
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "#d3d3d3",
+  },
+  pickerWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  pickerLabel: {
+    marginHorizontal: 5,
+    fontSize: 16,
+    color: "#545454",
   },
 });
 

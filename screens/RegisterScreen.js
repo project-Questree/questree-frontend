@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Icon from "react-native-vector-icons/Ionicons";
 import {
   View,
   Text,
@@ -7,6 +8,8 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
@@ -16,13 +19,13 @@ function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // 비밀번호 확인 상태 추가
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState(""); // 비밀번호 확인 에러 상태 추가
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
   const handleInputChange = (field, value) => {
     // 입력 값 변경 시에는 에러 메시지 초기화
@@ -115,77 +118,83 @@ function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeAreaContainer}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>{"<"}</Text>
-        </TouchableOpacity>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.headerTitle, { textAlign: "center" }]}>
-            회원가입
-          </Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeAreaContainer}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color="white" />
+          </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.headerTitle, { textAlign: "center" }]}>
+              회원가입
+            </Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.container}>
-        <Text style={styles.label}>아이디</Text>
-        <TextInput
-          style={[styles.input, nameError && styles.invalidInput]}
-          placeholder="ID"
-          value={name}
-          onChangeText={(text) => handleInputChange("name", text)}
-          onBlur={() => handleBlur("name")}
-        />
-        {nameError && <Text style={styles.errorText}>{nameError}</Text>}
+        <View style={styles.container}>
+          <Text style={styles.label}>이름</Text>
+          <TextInput
+            style={[styles.input, nameError && styles.invalidInput]}
+            placeholder="이름"
+            value={name}
+            onChangeText={(text) => handleInputChange("name", text)}
+            onBlur={() => handleBlur("name")}
+          />
+          <Text style={styles.errorText}>{nameError}</Text>
 
-        <Text style={styles.label}>이메일</Text>
-        <TextInput
-          style={[styles.input, emailError && styles.invalidInput]}
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => handleInputChange("email", text)}
-          keyboardType="email-address"
-          onBlur={() => handleBlur("email")}
-        />
-        {emailError && <Text style={styles.errorText}>{emailError}</Text>}
+          <Text style={styles.label}>이메일</Text>
+          <TextInput
+            style={[styles.input, emailError && styles.invalidInput]}
+            placeholder="Email"
+            value={email}
+            onChangeText={(text) => handleInputChange("email", text)}
+            keyboardType="email-address"
+            onBlur={() => handleBlur("email")}
+          />
+          <Text style={styles.errorText}>{emailError}</Text>
 
-        <Text style={styles.label}>휴대폰 번호</Text>
-        <TextInput
-          style={[styles.input, phoneError && styles.invalidInput]}
-          placeholder="휴대폰 번호"
-          value={phone}
-          onChangeText={(text) => handleInputChange("phone", text)}
-          keyboardType="phone-pad"
-          onBlur={() => handleBlur("phone")}
-        />
-        {phoneError && <Text style={styles.errorText}>{phoneError}</Text>}
+          <Text style={styles.label}>휴대폰 번호</Text>
+          <TextInput
+            style={[styles.input, phoneError && styles.invalidInput]}
+            placeholder="휴대폰 번호"
+            value={phone}
+            onChangeText={(text) => handleInputChange("phone", text)}
+            keyboardType="phone-pad"
+            onBlur={() => handleBlur("phone")}
+          />
+          <Text style={styles.errorText}>{phoneError}</Text>
 
-        <Text style={styles.label}>비밀번호</Text>
-        <TextInput
-          style={[styles.input, passwordError && styles.invalidInput]}
-          placeholder="비밀번호"
-          value={password}
-          onChangeText={(text) => handleInputChange("password", text)}
-          secureTextEntry
-          onBlur={() => handleBlur("password")}
-        />
-        {passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
-        <TextInput // 비밀번호 확인 입력 필드 추가
-          style={[styles.input, confirmPasswordError && styles.invalidInput]}
-          placeholder="비밀번호 확인"
-          value={confirmPassword}
-          onChangeText={(text) => handleInputChange("confirmPassword", text)}
-          secureTextEntry
-          onBlur={() => handleBlur("password")} // 비밀번호 필드와 동일하게 처리
-        />
-        {confirmPasswordError && (
+          <Text style={styles.label}>비밀번호</Text>
+          <TextInput
+            style={[styles.input, passwordError && styles.invalidInput]}
+            placeholder="비밀번호"
+            value={password}
+            onChangeText={(text) => handleInputChange("password", text)}
+            secureTextEntry
+            onBlur={() => handleBlur("password")}
+          />
+          <Text style={styles.errorText}>{passwordError}</Text>
+
+          <Text style={styles.label}>비밀번호 확인</Text>
+          <TextInput
+            style={[styles.input, confirmPasswordError && styles.invalidInput]}
+            placeholder="비밀번호 확인"
+            value={confirmPassword}
+            onChangeText={(text) => handleInputChange("confirmPassword", text)}
+            secureTextEntry
+            onBlur={() => handleBlur("password")} // 비밀번호 필드와 동일하게 처리
+          />
           <Text style={styles.errorText}>{confirmPasswordError}</Text>
-        )}
-        <TouchableOpacity style={styles.registerButton} onPress={handleSubmit}>
-          <Text style={styles.registerButtonText}>회원가입</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={handleSubmit}
+          >
+            <Text style={styles.registerButtonText}>회원가입</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -203,18 +212,20 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    height: 50,
+    height: 40,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     paddingHorizontal: 15,
-    marginBottom: 30,
+    marginBottom: 5,
   },
   registerButton: {
-    backgroundColor: "#8c6b52", // 로그아웃 버튼 색상 (예시)
-    padding: 12,
+    backgroundColor: "#008d62",
+    padding: 18,
     borderRadius: 5,
     width: "100%",
+
+    marginTop: 95,
   },
   registerButtonText: {
     color: "white",
@@ -229,13 +240,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    backgroundColor: "#8c6b52",
+    backgroundColor: "#66baa0",
     justifyContent: "center",
   },
   backButton: {
     fontSize: 24,
     color: "white",
-    marginRight: 10,
     fontWeight: "bold",
   },
   headerTitle: {
@@ -249,11 +259,14 @@ const styles = StyleSheet.create({
   errorText: {
     color: "red",
     fontSize: 12,
-    marginBottom: 0,
+    marginBottom: 5,
+
+    height: 16,
   },
   label: {
     fontSize: 16,
     fontWeight: "bold",
+    marginTop: 10,
     marginBottom: 5,
     alignSelf: "flex-start",
   },

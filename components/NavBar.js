@@ -8,6 +8,10 @@ const NavBar = ({ currentDate, setCurrentDate }) => {
     return `${month}/${day}`;
   };
 
+  const handleDatePress = () => {
+    setCurrentDate(new Date());
+  };
+
   const handlePreviousDay = () => {
     const previousDay = new Date(currentDate);
     previousDay.setDate(currentDate.getDate() - 1);
@@ -25,7 +29,11 @@ const NavBar = ({ currentDate, setCurrentDate }) => {
       <TouchableOpacity onPress={handlePreviousDay}>
         <Text style={styles.switchDateBtn}>{"◀"}</Text>
       </TouchableOpacity>
-      <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
+
+      <TouchableOpacity onPress={handleDatePress}>
+        <Text style={styles.dateText}>{formatDate(currentDate)}</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity onPress={handleNextDay}>
         <Text style={styles.switchDateBtn}>{"▶"}</Text>
       </TouchableOpacity>
@@ -45,15 +53,12 @@ const styles = StyleSheet.create({
     borderBottomColor: "#ccc", // 경계선 색상
   },
   switchDateBtn: {
-    color: "#684c38", // 색상 변경
+    color: "#66baa0", // 색상 변경
     fontSize: 30,
   },
   dateText: {
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "darkgrey",
     fontSize: 20,
-    backgroundColor: "#8c6b52",
+    backgroundColor: "#66baa0",
     color: "white",
     borderRadius: 35,
     width: 70,
