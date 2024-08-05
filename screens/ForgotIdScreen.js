@@ -86,6 +86,8 @@ function ForgotIdScreen() {
       setResultMessage("An error occurred while finding ID/email.");
     } finally {
       setIsLoading(false);
+      setName("");
+      setPhone("");
     }
   };
 

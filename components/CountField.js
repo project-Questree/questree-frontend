@@ -1,14 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
+import RNPickerSelect from "react-native-picker-select";
 
 const CountField = ({ countData, onCountDataChange }) => {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -36,11 +31,19 @@ const CountField = ({ countData, onCountDataChange }) => {
     onCountDataChange({ ...countData, endDate: date }); // Date 객체 전달
   };
 
+  const generatePickerItems = (max) => {
+    const items = [];
+    for (let i = 1; i <= max; i++) {
+      items.push({ label: `${i}`, value: i });
+    }
+    return items;
+  };
+
   return (
     <View style={styles.container}>
       {/* Start Date */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>시작 날짜:</Text>
+        <Text style={styles.dateLabel}>시작 날짜</Text>
         <TouchableOpacity
           style={styles.dateButton}
           onPress={() => setShowStartDatePicker(true)}
@@ -61,7 +64,7 @@ const CountField = ({ countData, onCountDataChange }) => {
 
       {/* End Date */}
       <View style={styles.fieldContainer}>
-        <Text style={styles.label}>종료 날짜:</Text>
+        <Text style={styles.dateLabel}>종료 날짜</Text>
         <TouchableOpacity
           style={styles.dateButton}
           onPress={() => setShowEndDatePicker(true)}
@@ -80,49 +83,72 @@ const CountField = ({ countData, onCountDataChange }) => {
         onCancel={() => setShowEndDatePicker(false)}
       />
 
-      {/* Intervals */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>간격 (일):</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={countData.intervals.toString()}
-          onChangeText={(text) =>
-            onCountDataChange({
-              ...countData,
-              intervals: parseInt(text) || 0,
-            })
-          }
-          placeholder="1 이상의 숫자 입력"
-        />
-      </View>
-
-      {/* Repeat Count */}
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>반복 횟수:</Text>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          value={countData.repeatCount.toString()}
-          onChangeText={(text) =>
-            onCountDataChange({
-              ...countData,
-              repeatCount: parseInt(text) || 0,
-            })
-          }
-          placeholder="숫자 입력"
-        />
-      </View>
-
-      {/* 반복 정보 표시 */}
-      <View style={styles.repeatInfoContainer}>
-        <Text style={styles.repeatInfoText}>
-          {countData.intervals}일 동안 {countData.repeatCount}번 반복하기
-        </Text>
+      {/* Intervals and Repeat Count */}
+      <View style={styles.pickerContainer}>
+        <View style={styles.pickerWrapper}>
+          <RNPickerSelect
+            onValueChange={(value) =>
+              onCountDataChange({ ...countData, intervals: value })
+            }
+            items={generatePickerItems(30)}
+            placeholder={{ label: "-", value: null }}
+            style={pickerSelectStyles}
+          />
+          <Text style={styles.pickerLabel}>일 동안</Text>
+          <RNPickerSelect
+            onValueChange={(value) =>
+              onCountDataChange({ ...countData, repeatCount: value })
+            }
+            items={generatePickerItems(30)}
+            placeholder={{ label: "-", value: null }}
+            style={pickerSelectStyles}
+          />
+          <Text style={styles.pickerLabel}>번 반복하기</Text>
+        </View>
       </View>
     </View>
   );
 };
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderWidth: 1,
+    borderColor: "#66baa0",
+    borderRadius: 5,
+    color: "white",
+    backgroundColor: "#66baa0",
+    textAlign: "center",
+    paddingRight: 15, // Ensures text is never behind the icon
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: "#66baa0",
+    borderRadius: 5,
+    color: "white",
+    backgroundColor: "#66baa0",
+    textAlign: "center",
+    paddingRight: 15, // Ensures text is never behind the icon
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  placeholder: {
+    color: "white",
+  },
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -143,14 +169,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 15,
   },
-  label: {
+  dateLabel: {
+    color: "#545454",
+    marginLeft: 8,
     flex: 1,
     fontSize: 16,
-    fontWeight: "bold",
   },
   dateButton: {
     flex: 2,
-    backgroundColor: "#e0f7fa",
+    backgroundColor: "#66baa0",
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 5,
@@ -161,30 +188,25 @@ const styles = StyleSheet.create({
   },
   dateButtonText: {
     fontSize: 16,
-    color: "#333",
+    color: "white",
   },
-  input: {
-    flex: 2,
-    height: 40,
-    marginLeft: 10,
-    borderColor: "gray",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: "#fff",
-  },
-  repeatInfoContainer: {
+  pickerContainer: {
     marginTop: 10,
-    backgroundColor: "#e0f7fa",
+    backgroundColor: "#f9f9f9",
     padding: 10,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: "#b2ebf2",
+    alignItems: "center",
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "#d3d3d3",
+  },
+  pickerWrapper: {
+    flexDirection: "row",
     alignItems: "center",
   },
-  repeatInfoText: {
+  pickerLabel: {
+    marginHorizontal: 5,
     fontSize: 16,
-    color: "#00796b",
+    color: "#545454",
   },
 });
 

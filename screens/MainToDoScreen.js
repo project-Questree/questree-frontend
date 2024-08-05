@@ -29,8 +29,8 @@ function MainToDoScreen() {
   const [newTodo, setNewTodo] = useState("");
   const [todoLists, setTodoLists] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [todoType, setTodoType] = useState("TODO");
-  const [selectedType, setSelectedType] = useState("TODO"); // 선택된 타입 상태
+  const [todoType, setTodoType] = useState("");
+  const [selectedType, setSelectedType] = useState(""); // 선택된 타입 상태
   const [targetedDays, setTargetedDays] = useState("0000000"); // targetedDays 상태 추가
   const [countData, setCountData] = useState({
     startDate: null,
@@ -43,19 +43,24 @@ function MainToDoScreen() {
     useState(true);
 
   const handleTypePress = (type) => {
-    setSelectedType(type); // 선택된 타입 변경 (UI에 사용)
-    setTodoType(type); // todoType 변경 (API 요청에 사용)
+    if (selectedType === type) {
+      setSelectedType(""); // 같은 타입을 다시 누르면 선택 해제
+      setSelectedTypeDescription("");
+    } else {
+      setSelectedType(type); // 선택된 타입 변경 (UI에 사용)
+      setTodoType(type); // todoType 변경 (API 요청에 사용)
 
-    // 선택된 타입에 대한 설명 설정
-    let description = "";
-    if (type === "TODO") {
-      description = "TODO : 특정 시점에 단 한 번 수행하는 할 일입니다.";
-    } else if (type === "WEEKLY") {
-      description = "WEEKLY : 매주 특정 요일에 반복되는 할 일입니다.";
-    } else if (type === "COUNT") {
-      description = "COUNT : 일정 기간 동안 여러 번 반복되는 할 일입니다.";
+      // 선택된 타입에 대한 설명 설정
+      let description = "";
+      if (type === "TODO") {
+        description = "특정 시점에 단 한 번 수행하는 할 일입니다.";
+      } else if (type === "WEEKLY") {
+        description = "매주 특정 요일에 반복되는 할 일입니다.";
+      } else if (type === "COUNT") {
+        description = "일정 기간 동안 여러 번 반복되는 할 일입니다.";
+      }
+      setSelectedTypeDescription(description);
     }
-    setSelectedTypeDescription(description);
   };
 
   const handleCloseModal = () => {
@@ -66,8 +71,8 @@ function MainToDoScreen() {
 
   const resetModalState = () => {
     setNewTodo("");
-    setTodoType("TODO");
-    setSelectedType("TODO");
+    setTodoType("");
+    setSelectedType("");
     setTargetedDays("0000000");
     setCountData({
       startDate: null,
@@ -77,23 +82,6 @@ function MainToDoScreen() {
     });
     setSelectedTypeDescription("");
     setStep(1);
-  };
-
-  const handleConfirmType = () => {
-    Alert.alert(
-      "타입 선택 확인",
-      `선택한 타입은 "${selectedType}"입니다. 계속하시겠습니까?`,
-      [
-        {
-          text: "취소",
-          style: "cancel",
-        },
-        {
-          text: "확인",
-          onPress: () => setStep(2), // 두 번째 단계로 이동
-        },
-      ],
-    );
   };
 
   const [isLoading, setIsLoading] = useState(true); // isLoading 상태 추가
@@ -183,6 +171,21 @@ function MainToDoScreen() {
         // COUNT 타입 유효성 검사
         if (!countData.startDate || !countData.endDate) {
           Alert.alert("Error", "시작 날짜와 종료 날짜를 선택해주세요.");
+          return;
+        } else if (!countData.intervals || !countData.repeatCount) {
+          Alert.alert("Error", "간격과 반복 횟수를 선택해주세요.");
+          return;
+        } else if (countData.startDate > countData.endDate) {
+          Alert.alert("Error", "종료 날짜는 시작 날짜보다 이후여야 합니다.");
+          return;
+        } else if (
+          countData.intervals >
+          (countData.endDate - countData.startDate) / (1000 * 60 * 60 * 24)
+        ) {
+          Alert.alert(
+            "Error",
+            "간격은 시작 날짜와 종료 날짜의 차이보다 작아야 합니다.",
+          );
           return;
         } else if (countData.intervals <= 0) {
           Alert.alert("Error", "간격은 1 이상이어야 합니다.");
@@ -375,9 +378,10 @@ function MainToDoScreen() {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
+      const currentDateISO = new Date().toISOString();
 
       const response = await fetch(
-        `https://api.questree.lesh.kr/plans/checked/${item.id}`,
+        `https://api.questree.lesh.kr/plans/checked/${item.id}?requestDate=${currentDateISO}`,
         {
           method: "POST",
           headers: {
@@ -452,6 +456,15 @@ function MainToDoScreen() {
     </View>
   );
 
+  const isToday = (date) => {
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <NavBar currentDate={currentDate} setCurrentDate={setCurrentDate} />
@@ -471,18 +484,20 @@ function MainToDoScreen() {
         )}
       </View>
       {/* 모달 띄우기 버튼 */}
-      <TouchableOpacity
-        style={[
-          styles.floatingPlusButton,
-          !floatingPlusButtonVisible && { display: "none" },
-        ]}
-        onPress={() => {
-          setModalVisible(true);
-          setFloatingPlusButtonVisible(false);
-        }}
-      >
-        <Text style={styles.floatingPlusButtonText}>+</Text>
-      </TouchableOpacity>
+      {isToday(currentDate) && (
+        <TouchableOpacity
+          style={[
+            styles.floatingPlusButton,
+            !floatingPlusButtonVisible && { display: "none" },
+          ]}
+          onPress={() => {
+            setModalVisible(true);
+            setFloatingPlusButtonVisible(false);
+          }}
+        >
+          <Text style={styles.floatingPlusButtonText}>+</Text>
+        </TouchableOpacity>
+      )}
 
       {/* AddToDo모달 */}
       <Modal
@@ -508,6 +523,21 @@ function MainToDoScreen() {
                   onPress={() => handleTypePress("TODO")}
                 >
                   <Text style={styles.typeButtonText}>TODO - 일회성 할 일</Text>
+                  {selectedType === "TODO" && (
+                    <>
+                      <Text style={styles.typeDescriptionText}>
+                        {selectedTypeDescription}
+                      </Text>
+                      <View style={styles.confirmButtonContainer}>
+                        <TouchableOpacity
+                          style={styles.confirmButton}
+                          onPress={() => setStep(2)}
+                        >
+                          <Text style={styles.buttonText}>선택</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
@@ -517,6 +547,21 @@ function MainToDoScreen() {
                   onPress={() => handleTypePress("WEEKLY")}
                 >
                   <Text style={styles.typeButtonText}>WEEKLY - 매주 할 일</Text>
+                  {selectedType === "WEEKLY" && (
+                    <>
+                      <Text style={styles.typeDescriptionText}>
+                        {selectedTypeDescription}
+                      </Text>
+                      <View style={styles.confirmButtonContainer}>
+                        <TouchableOpacity
+                          style={styles.confirmButton}
+                          onPress={() => setStep(2)}
+                        >
+                          <Text style={styles.buttonText}>선택</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
@@ -528,29 +573,22 @@ function MainToDoScreen() {
                   <Text style={styles.typeButtonText}>
                     COUNT - 특정 기간 내 횟수 반복 할 일
                   </Text>
+                  {selectedType === "COUNT" && (
+                    <>
+                      <Text style={styles.typeDescriptionText}>
+                        {selectedTypeDescription}
+                      </Text>
+                      <View style={styles.confirmButtonContainer}>
+                        <TouchableOpacity
+                          style={styles.confirmButton}
+                          onPress={() => setStep(2)}
+                        >
+                          <Text style={styles.buttonText}>선택</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </>
+                  )}
                 </TouchableOpacity>
-
-                {selectedTypeDescription !== "" && (
-                  <View style={styles.typeDescriptionContainer}>
-                    <Text style={styles.typeDescriptionText}>
-                      {selectedTypeDescription}
-                    </Text>
-                    <View style={styles.confirmButtonsContainer}>
-                      <TouchableOpacity
-                        style={styles.confirmButton}
-                        onPress={handleConfirmType}
-                      >
-                        <Text style={styles.confirmButtonText}>확인</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.cancelButton}
-                        onPress={() => setSelectedTypeDescription("")}
-                      >
-                        <Text style={styles.cancelButtonText}>취소</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-                )}
               </View>
             ) : (
               <View>
@@ -745,7 +783,7 @@ const styles = StyleSheet.create({
   },
   typeButton: {
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingVertical: 10,
     borderWidth: 1,
     borderColor: "#66baa0",
     borderRadius: 10,
@@ -848,9 +886,9 @@ const styles = StyleSheet.create({
   typeHeader: {
     fontSize: 18,
     marginBottom: 15,
-    color: "white", // 원하는 색상으로 변경
+    color: "black", // 원하는 색상으로 변경
     textAlign: "center",
-    backgroundColor: "#008d62", // 배경색 추가
+    backgroundColor: "#d3d3d3", // 배경색 추가
     paddingVertical: 10,
     borderRadius: 5,
     borderRadius: 10, // 둥근 모서리
@@ -863,23 +901,23 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   typeDescriptionText: {
+    paddingTop: 10,
     fontSize: 14,
-    color: "#333",
+    color: "white",
   },
-  confirmButtonsContainer: {
+  confirmButtonContainer: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    marginTop: 10,
   },
   confirmButton: {
     backgroundColor: "#008d62",
+    marginHorizontal: -10,
     padding: 10,
     borderRadius: 5,
-    marginRight: 3,
   },
   confirmButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 12,
   },
   cancelButton: {
     backgroundColor: "#ccc",

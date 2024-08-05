@@ -52,6 +52,10 @@ function LoginScreen({ navigation }) {
         AsyncStorage.setItem("accessToken", accessToken);
         AsyncStorage.setItem("refreshToken", refreshToken);
 
+        // Email과 Password state를 공백으로 설정
+        setNameOrEmail("");
+        setPassword("");
+
         // 로그인 후 메인 화면으로 이동
         navigation.navigate("MainToDo");
       })
@@ -171,13 +175,13 @@ const styles = StyleSheet.create({
   },
 
   loginButton: {
-    backgroundColor: "#008d62", // 로그아웃 버튼 색상 (예시)
+    backgroundColor: "#008d62",
     padding: 12,
     borderRadius: 5,
     width: "100%",
   },
   registerButton: {
-    backgroundColor: "#66baa0", // 로그아웃 버튼 색상 (예시)
+    backgroundColor: "#66baa0", //에메랄드색
     padding: 12,
     borderRadius: 5,
   },

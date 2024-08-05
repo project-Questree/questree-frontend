@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
   logoutButtonText: {
     color: "white",
-    fontSize: 20,
+    fontSize: 17,
     fontWeight: "bold",
     textAlign: "center",
   },

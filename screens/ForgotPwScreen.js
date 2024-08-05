@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -83,6 +84,9 @@ function ForgotPwScreen() {
             String.fromCharCode(10) +
             "이메일을 확인해주세요.",
         );
+        setEmail("");
+        setPhone("");
+        // 인풋창 초기화
       } else {
         const errorData = await response.text();
         Alert.alert(
@@ -159,6 +163,12 @@ function ForgotPwScreen() {
             <Text style={styles.buttonText}>비밀번호 찾기</Text>
           </TouchableOpacity>
         </View>
+
+        {isLoading && (
+          <View style={styles.spinnerContainer}>
+            <ActivityIndicator size="large" color="#008d62" />
+          </View>
+        )}
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
@@ -251,6 +261,15 @@ const styles = StyleSheet.create({
   resultMessage: {
     marginTop: 10,
     fontSize: 16,
+  },
+  spinnerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
