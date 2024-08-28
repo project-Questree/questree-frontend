@@ -11,13 +11,15 @@ import ForgotPwScreen from "./screens/ForgotPwScreen";
 import CalendarScreen from "./screens/CalendarScreen";
 import MyPageScreen from "./screens/MyPageScreen";
 import SettingScreen from "./screens/SettingScreen";
+import ProfileEditScreen from "./screens/ProfileEditScreen";
+import PasswordConfirmScreen from "./screens/PasswordConfirmScreen";
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="{Home}">
         <Stack.Screen
           name="Home"
           component={HomeScreen}
@@ -70,7 +72,17 @@ export default function App() {
           name="Setting"
           component={SettingScreen}
           options={{ headerShown: false }}
-        />
+        />    
+        <Stack.Screen
+        name="ProfileEdit"
+        component={ProfileEditScreen}
+        options={{ headerShown: false }}
+      />
+        <Stack.Screen
+        name="PasswordConfirm"
+        component={PasswordConfirmScreen}
+        options={{ headerShown: false }}
+      />
       </Stack.Navigator>
     </NavigationContainer>
   );

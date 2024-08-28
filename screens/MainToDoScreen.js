@@ -106,7 +106,7 @@ function MainToDoScreen() {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
 
-      const formattedDate = currentDate.toISOString(); // 현재 날짜를 ISO 8601 형식으로 변환
+      const formattedDate = currentDate.toISOString();
 
       const response = await fetch(
         `https://api.questree.lesh.kr/plans?requestDate=${formattedDate}`,
@@ -378,10 +378,11 @@ function MainToDoScreen() {
     try {
       const accessToken = await AsyncStorage.getItem("accessToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
-      const currentDateISO = new Date().toISOString();
+      const formattedDate = currentDate.toISOString();
+
 
       const response = await fetch(
-        `https://api.questree.lesh.kr/plans/checked/${item.id}?requestDate=${currentDateISO}`,
+        `https://api.questree.lesh.kr/plans/checked/${item.id}?requestDate=${formattedDate}`,
         {
           method: "POST",
           headers: {

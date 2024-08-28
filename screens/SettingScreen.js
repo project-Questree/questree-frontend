@@ -60,6 +60,10 @@ function SettingScreen() {
     setTheme(theme === "light" ? "dark" : "light");
   };
 
+  const handleProfileEdit = () => {
+    navigation.navigate("PasswordConfirm");
+  };
+
   const handleLogout = () => {
     Alert.alert("로그아웃", "로그아웃 하시겠습니까?", [
       { text: "취소", style: "cancel" },
@@ -102,25 +106,42 @@ function SettingScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="black" />
+        <Icon name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.title}>설정</Text>
       </View>
       <View style={styles.settingItemContainer}>
         <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>알림 설정</Text>
+          <View style={styles.settingItemIconLabel}>
+            <Icon name="notifications-outline" size={24} color="black" style={styles.icon} />
+            <Text style={styles.settingLabel}>알림 설정</Text>
+          </View>
           <Switch
             value={notificationsEnabled}
             onValueChange={toggleNotifications}
           />
         </View>
         <View style={styles.settingItem}>
-          <Text style={styles.settingLabel}>테마 설정</Text>
+          <View style={styles.settingItemIconLabel}>
+            <Icon name="moon-outline" size={24} color="black" style={styles.icon} />
+            <Text style={styles.settingLabel}>테마 설정</Text>
+          </View>
           <TouchableOpacity onPress={toggleTheme}>
             <Text style={styles.themeText}>
               {theme === "light" ? "밝게" : "어둡게"}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.settingItem}>
+          <View style={styles.settingItemIconLabel}>
+            <Icon name="person-outline" size={24} color="black" style={styles.icon} />
+            <TouchableOpacity onPress={handleProfileEdit} style={styles.settingItemRow}>        
+              <Text style={styles.settingLabel}>개인정보 수정</Text>    
+              <Icon name="chevron-forward-outline" size={22} color="grey" />
+
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -136,19 +157,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   header: {
-    padding: 10,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-    marginBottom: 20,
+    padding: 16,
+    backgroundColor: "#66baa0",
+    justifyContent: "flex-start",
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 10,
+    color: "white",
+    flex: 1, 
+    textAlign: "center",
+    marginRight:12,
   },
   settingItemContainer: {
     flex: 2,
@@ -163,8 +184,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
+  settingItemIconLabel: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   settingLabel: {
     fontSize: 16,
+  },
+  settingItemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between", // 아이콘을 오른쪽에 배치하기 위해 추가
+    flex: 1,},
+  icon: {
+    marginRight: 10,
   },
   themeText: {
     fontSize: 16,

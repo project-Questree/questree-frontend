@@ -10,17 +10,50 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import BottomTabBar from "../components/BottomTabBar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 
 function MyPageScreen() {
   const navigation = useNavigation();
-  const [userName, setUserName] = useState("사용자 이름"); // TODO: API에서 가져오기
-  const [completedTasks, setCompletedTasks] = useState(0); // TODO: API에서 가져오기
-  const [inProgressTasks, setInProgressTasks] = useState(0); // TODO: API에서 가져오기
-  const [goalAchievementRate, setGoalAchievementRate] = useState(0); // TODO: API에서 가져오기
+  const [userName, setUserName] = useState("사용자 이름");
+  const [completedTasks, setCompletedTasks] = useState(0);
+  const [inProgressTasks, setInProgressTasks] = useState(0);
+  const [goalAchievementRate, setGoalAchievementRate] = useState(0);
 
   const handleSettingsPress = () => {
     navigation.navigate("Setting"); // 설정 페이지로 이동
   };
+
+  useFocusEffect(
+  React.useCallback(() => {
+    const fetchUserName = async () => {
+      try {
+        const accessToken = await AsyncStorage.getItem("accessToken");
+        const refreshToken = await AsyncStorage.getItem("refreshToken");
+
+        const response = await fetch(
+          "https://api.questree.lesh.kr/member/getMemberInfo",
+          {
+            method: "GET",
+            headers: {
+              Authorization: accessToken,
+              "X-Refresh-Token": refreshToken,
+            },
+          }
+        );
+
+        const data = await response.json();
+        console.log("API response:", data);
+        setUserName(data.name || "사용자 이름");
+      } catch (error) {
+        console.error("Failed to fetch user name:", error);
+      }
+    };
+
+    fetchUserName();
+  }, [])
+);
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -34,12 +67,17 @@ function MyPageScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* 프로필 영역 */}
-      <View style={styles.profileContainer}>
-        <Text>사진</Text>
-        <Text style={styles.userName}>{userName}</Text>
-        <Text style={styles.introduce}>자기소개</Text>
-      </View>
+   {/* 프로필 영역 */}
+<View style={styles.profileContainer}>
+  <Image 
+     source={require("../assets/tree-icon.png")}
+    style={styles.profileImage} 
+  />
+  <View style={styles.profileTextContainer}>
+    <Text style={styles.userName}>{userName}</Text>
+    <Text style={styles.introduce}>안녕하세요</Text>
+  </View>
+</View>
 
       {/* 통계 영역 */}
       <View style={styles.statsContainer}>
@@ -68,29 +106,42 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    padding: 16,
+    backgroundColor: "white",
+    justifyContent: "flex-start",
+    borderBottomWidth:1,
+    borderBottomColor: "#ccc",
+
   },
   title: {
-    padding: 20,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-  },
-  settingButton: {
-    padding: 10,
-  },
+    color: "black",
+    flex: 1, 
+    textAlign: "center",
+    marginLeft:20,
+  
+  }, 
   profileContainer: {
-    flex: 0.8,
-    alignItems: "center",
+    flexDirection: "row", // 사진과 텍스트를 가로로 배치
+    alignItems: "center", // 수직 가운데 정렬
+    padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
+    width: 80, // 원하는 크기로 설정
+    height: 80,
+    borderWidth:1.5,
+    borderRadius: 40, // 원형으로 만들기 위해 반지름을 높이의 절반으로 설정
+    marginRight: 20, // 이미지와 텍스트 사이의 간격
+  },
+  profileTextContainer: {
+    flex: 1, // 남은 공간을 차지하도록 설정
+    justifyContent: "center",
+    padding:5,
+    marginBottom:10,
   },
   userName: {
     fontSize: 20,
