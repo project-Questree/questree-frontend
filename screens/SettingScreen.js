@@ -106,7 +106,7 @@ function SettingScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Icon name="arrow-back" size={24} color="white" />
+        <Icon name="chevron-back-outline" size={24} color="white" />
         </TouchableOpacity>
         <Text style={styles.title}>설정</Text>
       </View>

@@ -122,7 +122,7 @@ function RegisterScreen() {
       <SafeAreaView style={styles.safeAreaContainer}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back" size={24} color="white" />
+          <Icon name="chevron-back-outline" size={24} color="white" />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { textAlign: "center" }]}>
